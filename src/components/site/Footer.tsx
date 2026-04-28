@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Phone, Mail, Instagram, Facebook, Twitter, ArrowUpRight } from "lucide-react";
+import { MapPin, Phone, Mail, Instagram, Facebook, ArrowUpRight } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { LOCATIONS, SITE } from "@/data/site";
 import logo from "@/assets/logo.png";
@@ -97,31 +97,67 @@ export function Footer() {
             </p>
 
             <div className="wm-footer__social">
-              {[
-                { Icon: Instagram, label: "Instagram" },
-                { Icon: Facebook,  label: "Facebook"  },
-                { Icon: Twitter,   label: "Twitter"   },
-              ].map(({ Icon, label }, i) => (
-                <motion.a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="wm-footer__social-link"
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: 0.3 + i * 0.08 }}
-                  whileHover={{
-                    y: -4,
-                    rotateZ: i % 2 === 0 ? -6 : 6,
-                    scale: 1.2,
-                    transition: { type: "spring", stiffness: 380, damping: 20 },
-                  }}
-                  whileTap={{ scale: 0.92 }}
-                >
-                  <Icon />
-                </motion.a>
-              ))}
+              {/* Instagram */}
+              <motion.a
+                href="#"
+                aria-label="Instagram"
+                className="wm-footer__social-link"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                whileHover={{
+                  y: -4,
+                  rotateZ: -6,
+                  scale: 1.2,
+                  transition: { type: "spring", stiffness: 380, damping: 20 },
+                }}
+                whileTap={{ scale: 0.92 }}
+              >
+                <Instagram />
+              </motion.a>
+
+              {/* Facebook — links to https://www.facebook.com/wisemart2 */}
+              <motion.a
+                href="https://www.facebook.com/wisemart2"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="wm-footer__social-link"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.38 }}
+                whileHover={{
+                  y: -4,
+                  rotateZ: 6,
+                  scale: 1.2,
+                  transition: { type: "spring", stiffness: 380, damping: 20 },
+                }}
+                whileTap={{ scale: 0.92 }}
+              >
+                <Facebook />
+              </motion.a>
+
+              {/* Mail — links to info@wisemart2.com */}
+              <motion.a
+                href="mailto:info@wisemart2.com"
+                aria-label="Email"
+                className="wm-footer__social-link"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.46 }}
+                whileHover={{
+                  y: -4,
+                  rotateZ: -6,
+                  scale: 1.2,
+                  transition: { type: "spring", stiffness: 380, damping: 20 },
+                }}
+                whileTap={{ scale: 0.92 }}
+              >
+                <Mail />
+              </motion.a>
             </div>
           </motion.div>
 
@@ -136,12 +172,12 @@ export function Footer() {
             <div className="wm-footer__heading">Quick Links</div>
             <nav className="wm-footer__links">
               {[
-                { to: "/",         label: "Home"      },
+                { to: "/",          label: "Home"      },
                 { to: "/locations", label: "Locations" },
-                { to: "/order",    label: "Order Now"  },
-                { to: "/about",    label: "About"      },
-                { to: "/faq",      label: "FAQ"        },
-                { to: "/contact",  label: "Contact"    },
+                { to: "/order",     label: "Order Now"  },
+                { to: "/about",     label: "About"      },
+                { to: "/faq",       label: "FAQ"        },
+                { to: "/contact",   label: "Contact"    },
               ].map(({ to, label }, i) => (
                 <motion.div
                   key={label}
@@ -202,7 +238,11 @@ export function Footer() {
 
               <div className="wm-footer__contact-group">
                 <div className="wm-footer__contact-label">Email</div>
-                <ContactRow href={`mailto:${SITE.email}`} icon={<Mail />} text={SITE.email} />
+                <ContactRow
+                  href="mailto:info@wisemart2.com"
+                  icon={<Mail />}
+                  text="info@wisemart2.com"
+                />
               </div>
 
               <div className="wm-footer__contact-divider" />
