@@ -124,7 +124,7 @@ function BannerParticles() {
   );
 }
 
-function DetailRow({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
+function DetailRow({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
     <li className="wml-detail-row">
       <Icon className="wml-detail-icon" />
