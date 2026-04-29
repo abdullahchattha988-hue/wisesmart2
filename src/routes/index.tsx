@@ -819,7 +819,7 @@ function HomePage() {
           transform: translateY(-3px);
         }
         .wm-review::before {
-          content: '\201C';
+          content: "“";
           position: absolute; top: -12px; right: 20px;
           font-family: 'Playfair Display', serif; font-size: 100px;
           color: rgba(194,96,10,0.07); line-height: 1; pointer-events: none;
