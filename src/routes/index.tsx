@@ -146,7 +146,6 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
   );
 }
 
-/* Particle burst component for hero */
 function HeroParticles() {
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
@@ -162,17 +161,8 @@ function HeroParticles() {
             left: `${5 + (i * 5.3) % 90}%`,
             top: `${10 + (i * 7.7) % 80}%`,
           }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0, 0.8, 0],
-            scale: [0, 1, 0],
-          }}
-          transition={{
-            duration: 3 + (i % 4),
-            delay: i * 0.4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ y: [0, -30, 0], opacity: [0, 0.8, 0], scale: [0, 1, 0] }}
+          transition={{ duration: 3 + (i % 4), delay: i * 0.4, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
     </div>
@@ -189,8 +179,7 @@ function HomePage() {
   const bgOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
   const bgScale   = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
-  /* counter animation helper */
-  const statsRef = useRef<HTMLDivElement>(null);
+  const statsRef  = useRef<HTMLDivElement>(null);
   const statsInView = useInView(statsRef, { once: true, margin: "-80px" });
 
   return (
@@ -336,6 +325,12 @@ function HomePage() {
         .wm-stat__num   { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 700; color: #fff; line-height: 1; }
         .wm-stat__label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.75); margin-top: 4px; letter-spacing: 0.08em; text-transform: uppercase; }
 
+        /* fix 2-col stats: remove right border on 2nd item on mobile */
+        @media(max-width:767px){
+          .wm-stat:nth-child(2) { border-right: none; }
+          .wm-stat__num { font-size: 32px; }
+        }
+
         /* ── VALUES ── */
         .wm-values { padding: 100px 0; }
         .wm-values__grid {
@@ -370,6 +365,17 @@ function HomePage() {
         .wm-value__title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: #fff; margin-top: 22px; }
         .wm-value__desc  { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 8px; line-height: 1.65; }
 
+        /* mobile values: single column */
+        @media(max-width:479px){
+          .wm-values { padding: 64px 0; }
+          .wm-values__grid { grid-template-columns: 1fr; }
+          .wm-value { padding: 28px 20px; }
+        }
+        @media(min-width:480px) and (max-width:1023px){
+          .wm-values { padding: 72px 0; }
+          .wm-value { padding: 32px 22px; }
+        }
+
         /* ── LOCATIONS ── */
         .wm-locations { padding: 100px 0; background: #0f0e0d; }
         .wm-locations__grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 56px; }
@@ -403,6 +409,16 @@ function HomePage() {
         .wm-loc-card__phone:hover { color: rgba(255,255,255,0.55); }
         .wm-loc-card__phone svg { width: 11px; height: 11px; }
 
+        /* mobile locations */
+        @media(max-width:479px){
+          .wm-locations { padding: 64px 0; }
+          .wm-loc-card { padding: 24px 20px; }
+          .wm-loc-card__name { font-size: 26px; }
+        }
+        @media(min-width:480px) and (max-width:767px){
+          .wm-locations { padding: 72px 0; }
+        }
+
         /* ── FEATURED ── */
         .wm-featured { padding: 100px 0; }
         .wm-featured__header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -433,6 +449,18 @@ function HomePage() {
         .wm-feat-card__name  { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.9); }
         .wm-feat-card__price { font-size: 12px; color: #d97706; margin-top: 4px; font-weight: 500; }
 
+        /* mobile featured */
+        @media(max-width:479px){
+          .wm-featured { padding: 64px 0; }
+          .wm-featured__grid { grid-template-columns: 1fr; gap: 14px; }
+          .wm-featured__header { flex-direction: column; align-items: flex-start; gap: 8px; }
+          .wm-feat-card__body { padding: 14px; }
+          .wm-feat-card__name { font-size: 16px; }
+        }
+        @media(min-width:480px) and (max-width:1023px){
+          .wm-featured { padding: 72px 0; }
+        }
+
         /* ── STORY ── */
         .wm-story { padding: 100px 0; background: #0f0e0d; }
         .wm-story__inner { display: grid; grid-template-columns: 1fr; gap: 56px; align-items: center; }
@@ -458,6 +486,17 @@ function HomePage() {
           font-size: 20px; font-weight: 600; color: #fff; line-height: 1.3;
         }
 
+        /* mobile story */
+        @media(max-width:479px){
+          .wm-story { padding: 64px 0; }
+          .wm-story__inner { gap: 36px; }
+          .wm-story__img-caption { font-size: 16px; padding: 16px 16px 14px; }
+        }
+        @media(min-width:480px) and (max-width:1023px){
+          .wm-story { padding: 72px 0; }
+          .wm-story__inner { gap: 40px; }
+        }
+
         /* ── TESTIMONIALS ── */
         .wm-testimonials { padding: 100px 0; }
         .wm-testimonials__grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 56px; }
@@ -476,14 +515,22 @@ function HomePage() {
         .wm-review__quote  { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: rgba(255,255,255,0.85); margin-top: 16px; line-height: 1.45; }
         .wm-review__author { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 16px; }
 
+        /* mobile testimonials */
+        @media(max-width:479px){
+          .wm-testimonials { padding: 64px 0; }
+          .wm-review { padding: 22px 18px; }
+          .wm-review__quote { font-size: 16px; }
+        }
+        @media(min-width:480px) and (max-width:767px){
+          .wm-testimonials { padding: 72px 0; }
+          .wm-testimonials__grid { grid-template-columns: 1fr; }
+        }
+
         /* ── FAQ ── */
         .wm-faq { padding: 100px 0; background: #0f0e0d; }
         .wm-faq__cols { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 56px; }
         @media(min-width:768px){ .wm-faq__cols { grid-template-columns: 1fr 1fr; gap: 0 40px; } }
-        .wm-faq-item {
-          border-bottom: 1px solid rgba(255,255,255,0.07);
-          overflow: hidden;
-        }
+        .wm-faq-item { border-bottom: 1px solid rgba(255,255,255,0.07); overflow: hidden; }
         .wm-faq-btn {
           width: 100%; background: none; border: none; cursor: pointer;
           padding: 22px 0; display: flex; align-items: center; justify-content: space-between;
@@ -498,6 +545,16 @@ function HomePage() {
         }
         .wm-faq-btn:hover .wm-faq-icon { background: #d97706; color: #fff; }
         .wm-faq-a-inner { padding: 0 0 20px; font-size: 13px; color: rgba(255,255,255,0.42); line-height: 1.75; }
+
+        /* mobile faq */
+        @media(max-width:479px){
+          .wm-faq { padding: 64px 0; }
+          .wm-faq-q { font-size: 13px; }
+          .wm-faq-btn { padding: 18px 0; }
+        }
+        @media(min-width:480px) and (max-width:767px){
+          .wm-faq { padding: 72px 0; }
+        }
 
         /* ── CTA BANNER ── */
         .wm-cta-banner { padding: 0 0 100px; }
@@ -521,6 +578,18 @@ function HomePage() {
         .wm-btn-light { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; font-weight: 600; border-radius: 6px; text-decoration: none; border: 1px solid rgba(255,255,255,0.3); transition: background 0.2s, transform 0.2s; }
         .wm-btn-light:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
 
+        /* mobile cta */
+        @media(max-width:479px){
+          .wm-cta-banner { padding: 0 0 64px; }
+          .wm-cta-banner__box { padding: 36px 24px; border-radius: 16px; gap: 24px; }
+          .wm-cta-banner__btns { flex-direction: column; }
+          .wm-btn-dark, .wm-btn-light { justify-content: center; width: 100%; }
+        }
+        @media(min-width:480px) and (max-width:767px){
+          .wm-cta-banner { padding: 0 0 80px; }
+          .wm-cta-banner__box { padding: 44px 32px; }
+        }
+
         /* ── shimmer animation ── */
         @keyframes shimmer {
           0%   { background-position: -200% center; }
@@ -532,6 +601,39 @@ function HomePage() {
           -webkit-background-clip: text; background-clip: text;
           -webkit-text-fill-color: transparent; color: transparent;
           animation: shimmer 4s linear infinite;
+        }
+
+        /* ── GLOBAL MOBILE / TABLET POLISH ── */
+
+        /* hero inner padding on small screens */
+        @media(max-width:479px){
+          .wm-hero__inner { padding: 100px 20px 60px; gap: 32px; }
+          .wm-hero__sub   { font-size: 14px; }
+          .wm-hero__ctas  { flex-direction: column; }
+          .wm-btn-primary, .wm-btn-outline { justify-content: center; width: 100%; }
+        }
+        @media(min-width:480px) and (max-width:767px){
+          .wm-hero__inner { padding: 110px 28px 72px; }
+        }
+        @media(min-width:768px) and (max-width:1023px){
+          .wm-hero__inner { padding: 120px 40px 80px; }
+        }
+
+        /* section title on mobile */
+        @media(max-width:479px){
+          .wm-section-title { font-size: clamp(28px, 8vw, 38px); }
+          .wm-section-sub   { font-size: 13px; }
+        }
+
+        /* eyebrow lines shorter on tiny screens */
+        @media(max-width:360px){
+          .wm-eyebrow::before, .wm-eyebrow::after { width: 16px; }
+        }
+
+        /* touch — disable tilt transforms on hover-less devices */
+        @media(hover:none){
+          .wm-btn-primary:hover, .wm-btn-outline:hover,
+          .wm-btn-dark:hover, .wm-btn-light:hover { transform: none; }
         }
       `}</style>
 
@@ -592,29 +694,24 @@ function HomePage() {
               </motion.div>
             </motion.div>
 
-            {/* RIGHT — 3-D food cards with float */}
+            {/* RIGHT — 3-D food cards */}
             <div className="wm-hero__cards">
               {[
-                { img: heroPizza,   name: "Hand-Stretched Pizza",  price: "from $12.99", delay: 0.5,  floatDelay: 0   },
-                { img: heroChicken, name: "Famous Fried Chicken",  price: "from $6.99",  delay: 0.65, floatDelay: 0.7 },
-                { img: heroSub,     name: "Hot Subs & Steaks",     price: "from $11.99", delay: 0.8,  floatDelay: 1.1 },
-                { img: heroSalad,   name: "Fresh Salads",          price: "from $9.99",  delay: 0.95, floatDelay: 0.4 },
+                { img: heroPizza,   name: "Hand-Stretched Pizza",  price: "from $12.99", delay: 0.5  },
+                { img: heroChicken, name: "Famous Fried Chicken",  price: "from $6.99",  delay: 0.65 },
+                { img: heroSub,     name: "Hot Subs & Steaks",     price: "from $11.99", delay: 0.8  },
+                { img: heroSalad,   name: "Fresh Salads",          price: "from $9.99",  delay: 0.95 },
               ].map((item, i) => (
                 <motion.div
                   key={i}
                   className="wm-food-card"
                   initial={{ opacity: 0, y: 60, rotateX: 20, rotateY: i % 2 === 0 ? -8 : 8, scale: 0.88 }}
-                  animate={{
-                    opacity: 1,
-                    y: i % 2 === 0 ? 0 : 28,
-                    rotateX: 0, rotateY: 0, scale: 1,
-                  }}
+                  animate={{ opacity: 1, y: i % 2 === 0 ? 0 : 28, rotateX: 0, rotateY: 0, scale: 1 }}
                   transition={{ duration: 0.85, delay: item.delay, ease: [0.22,1,0.36,1] }}
                   whileHover={{
                     y: (i % 2 === 0 ? 0 : 28) - 8,
                     rotateY: i % 2 === 0 ? 4 : -4,
-                    rotateX: -3,
-                    scale: 1.03,
+                    rotateX: -3, scale: 1.03,
                     transition: { duration: 0.3 },
                   }}
                   style={{ transformStyle: "preserve-3d", perspective: 900 }}
@@ -855,22 +952,18 @@ function HomePage() {
               <h2 className="wm-display wm-section-title" style={{ textAlign: "center" }}>Quick Answers</h2>
               <p className="wm-section-sub" style={{ margin: "10px auto 0" }}>Quick answers to the things our guests ask most.</p>
             </div>
-
             <div className="wm-faq__cols">
-              {/* left column */}
               <div>
                 {FAQS.slice(0, 5).map((item, i) => (
                   <FAQItem key={i} q={item.q} a={item.a} index={i} />
                 ))}
               </div>
-              {/* right column */}
               <div>
                 {FAQS.slice(5).map((item, i) => (
                   <FAQItem key={i + 5} q={item.q} a={item.a} index={i + 5} />
                 ))}
               </div>
             </div>
-
             <div style={{ textAlign: "center", marginTop: 48 }}>
               <Link to="/faq" className="wm-story__link" style={{ display: "inline-flex" }}>
                 See all FAQs <ArrowRight />
