@@ -167,457 +167,162 @@ export function MenuPage({ slug }: { slug: LocationSlug }) {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+      font-weight: 700;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  .wmp-footnote {
+    padding: 0.9rem 1.35rem;
+    border-top: 1px solid rgba(242, 235, 227, 0.07);
+    background: rgba(200, 89, 10, 0.035);
+    color: var(--wmp-ink-faint);
+    font-size: 0.76rem;
+    line-height: 1.65;
+  }
 
-        .wmp-page {
-          font-family: 'DM Sans', sans-serif;
-          background: #070605;
-          color: #f0ebe4;
-          -webkit-font-smoothing: antialiased;
-          overflow-x: hidden;
-        }
+  .wmp-cta-wrap {
+    padding: 1rem 0 5rem;
+  }
 
-        /* ════════════ HERO ════════════ */
-        .wmp-hero {
-          position: relative; min-height: 100svh;
-          background: #070605; overflow: hidden;
-          display: flex; flex-direction: column; justify-content: flex-end;
-        }
-        .wmp-hero__bg {
-          position: absolute; inset: -8%;
-          background-size: cover; background-position: center 30%;
-          will-change: transform;
-        }
-        /* cinematic gradient stack */
-        .wmp-hero__ov {
-          position: absolute; inset: 0;
-          background:
-            linear-gradient(180deg,
-              rgba(7,6,5,0.22) 0%,
-              rgba(7,6,5,0.55) 40%,
-              rgba(7,6,5,0.94) 76%,
-              rgba(7,6,5,1.00) 100%
-            ),
-            linear-gradient(100deg,
-              rgba(7,6,5,0.96) 0%,
-              rgba(7,6,5,0.62) 44%,
-              transparent 68%
-            );
-        }
-        /* amber warmth at bottom-left */
-        .wmp-hero__amber {
-          position: absolute; inset: 0; pointer-events: none;
-          background: radial-gradient(ellipse 70% 55% at 8% 88%, rgba(200,89,10,0.11) 0%, transparent 58%);
-        }
-        /* grain */
-        .wmp-hero__grain {
-          position: absolute; inset: 0; pointer-events: none; opacity: 0.03;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-          background-size: 160px 160px;
-        }
-        /* ambient orb */
-        .wmp-hero__orb {
-          position: absolute; bottom: -80px; left: -60px;
-          width: 440px; height: 440px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(200,89,10,0.13) 0%, transparent 68%);
-          filter: blur(72px); pointer-events: none;
-        }
+  .wmp-cta {
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    padding: clamp(2rem, 5vw, 4.2rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    background:
+      radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.14), transparent 46%),
+      var(--wmp-accent);
+    color: white;
+  }
 
-        .wmp-hero__inner {
-          position: relative; z-index: 2;
-          max-width: 1360px; margin: 0 auto;
-          padding: 0 44px 88px; width: 100%;
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 52px; align-items: flex-end;
-        }
-        @media(max-width:960px){
-          .wmp-hero__inner { grid-template-columns: 1fr; padding: 0 28px 72px; }
-        }
+  .wmp-cta-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%);
+    background-size: 12px 12px;
+  }
 
-        /* eyebrow */
-        .wmp-eyebrow {
-          display: inline-flex; align-items: center; gap: 8px;
-          font-size: 9.5px; font-weight: 700; letter-spacing: 0.26em;
-          text-transform: uppercase; color: #c8590a;
-          text-decoration: none;
-          transition: opacity 0.22s;
-        }
-        .wmp-eyebrow:hover { opacity: 0.72; }
-        .wmp-eyebrow-line {
-          display: inline-block; width: 22px; height: 1px;
-          background: #c8590a; opacity: 0.55; flex-shrink: 0;
-        }
+  .wmp-cta-ring {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
 
-        .wmp-hero__title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(54px, 7.8vw, 100px);
-          font-weight: 700; line-height: 0.96;
-          letter-spacing: -0.015em; color: #f0ebe4;
-          margin-top: 22px;
-        }
-        .wmp-shimmer {
-          background: linear-gradient(92deg,
-            #c8590a 0%, #e8812a 22%, #f5b040 40%,
-            #fbc95a 50%, #e8812a 65%, #c8590a 100%
-          );
-          background-size: 280% auto;
-          -webkit-background-clip: text; background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: wmpShimmer 5s linear infinite;
-        }
-        @keyframes wmpShimmer {
-          0%   { background-position: -140% center; }
-          100% { background-position:  140% center; }
-        }
+  .wmp-cta-ring::after {
+    content: "";
+    position: absolute;
+    inset: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-        .wmp-hero__sub {
-          font-size: 14.5px; color: rgba(240,235,228,0.44);
-          line-height: 1.85; margin-top: 22px; max-width: 440px;
-          font-weight: 300;
-        }
-        .wmp-hero__actions {
-          display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px;
-        }
+  .wmp-cta-copy,
+  .wmp-cta-actions {
+    position: relative;
+    z-index: 1;
+  }
 
-        /* hero info card */
-        .wmp-hero__card {
-          background: rgba(7,6,5,0.52);
-          border: 1px solid rgba(240,235,228,0.10);
-          border-radius: 20px; padding: 32px;
-          backdrop-filter: blur(22px) saturate(1.2);
-          display: flex; flex-direction: column; gap: 18px;
-          transition: border-color 0.38s, box-shadow 0.38s;
-        }
-        @media(max-width:960px){ .wmp-hero__card { display: none; } }
-        .wmp-hero__card:hover {
-          border-color: rgba(200,89,10,0.32);
-          box-shadow: 0 28px 72px rgba(0,0,0,0.55);
-        }
+  .wmp-cta-title {
+    margin: 0;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(2.2rem, 5vw, 3.7rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
 
-        .wmp-loc-badge {
-          display: inline-flex; align-items: center; gap: 8px;
-        }
-        .wmp-loc-num {
-          font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em;
-          text-transform: uppercase; color: rgba(240,235,228,0.2);
-        }
-        .wmp-specialty-tag {
-          display: inline-block;
-          background: rgba(200,89,10,0.12); color: #c8590a;
-          font-size: 9px; font-weight: 700; letter-spacing: 0.18em;
-          text-transform: uppercase; padding: 5px 13px;
-          border-radius: 50px; border: 1px solid rgba(200,89,10,0.26);
-        }
+  .wmp-cta-text {
+    margin: 0.7rem 0 0;
+    max-width: 42rem;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.97rem;
+    line-height: 1.75;
+  }
 
-        .wmp-hero__card-row {
-          display: flex; align-items: flex-start; gap: 11px;
-          font-size: 13px; color: rgba(240,235,228,0.58); line-height: 1.6;
-        }
-        .wmp-hero__card-icon {
-          color: #c8590a; flex-shrink: 0; margin-top: 1px;
-        }
-        .wmp-hero__card-row a {
-          color: inherit; text-decoration: none; transition: color 0.2s;
-        }
-        .wmp-hero__card-row a:hover { color: rgba(240,235,228,0.88); }
+  @media (max-width: 980px) {
+    .wmp-hero-inner {
+      grid-template-columns: 1fr;
+      padding-bottom: 4.75rem;
+    }
 
-        .wmp-card-divider {
-          height: 1px;
-          background: linear-gradient(90deg, rgba(240,235,228,0.08), transparent);
-        }
+    .wmp-hero-card-wrap {
+      align-self: auto;
+    }
+  }
 
-        .wmp-jump-label {
-          font-size: 9px; font-weight: 700; letter-spacing: 0.2em;
-          text-transform: uppercase; color: rgba(240,235,228,0.22);
-          margin-bottom: 10px;
-        }
-        .wmp-jump-pills { display: flex; flex-wrap: wrap; gap: 6px; }
-        .wmp-jump-pill {
-          font-size: 10.5px; font-weight: 600;
-          padding: 5px 12px; border-radius: 50px;
-          border: 1px solid rgba(240,235,228,0.10);
-          color: rgba(240,235,228,0.42); text-decoration: none;
-          transition: border-color 0.22s, color 0.22s, background 0.22s;
-        }
-        .wmp-jump-pill:hover {
-          border-color: rgba(200,89,10,0.5);
-          color: #c8590a;
-          background: rgba(200,89,10,0.07);
-        }
+  @media (max-width: 720px) {
+    .wmp-shell {
+      width: min(1280px, calc(100% - 1.4rem));
+    }
 
-        /* scroll cue */
-        .wmp-scroll-cue {
-          position: absolute; bottom: 28px; left: 50%;
-          transform: translateX(-50%); z-index: 3;
-          display: flex; flex-direction: column;
-          align-items: center; gap: 7px;
-          font-size: 9px; letter-spacing: 0.22em;
-          text-transform: uppercase; color: rgba(240,235,228,0.22);
-        }
-        .wmp-scroll-cue__track {
-          width: 1px; height: 44px;
-          background: rgba(240,235,228,0.10); position: relative; overflow: hidden;
-        }
-        .wmp-scroll-cue__track::after {
-          content: '';
-          position: absolute; top: -100%; left: 0;
-          width: 100%; height: 100%;
-          background: linear-gradient(to bottom, transparent, #c8590a, transparent);
-          animation: scrollDrop 2.1s ease-in-out infinite;
-        }
-        @keyframes scrollDrop {
-          0%   { top: -100%; opacity: 0; }
-          25%  { opacity: 1; }
-          75%  { opacity: 0.6; }
-          100% { top: 100%; opacity: 0; }
-        }
+    .wmp-hero-title {
+      font-size: clamp(2.9rem, 14vw, 4.5rem);
+    }
 
-        /* ════════════ STICKY NAV ════════════ */
-        .wmp-nav {
-          position: sticky; top: 0; z-index: 40;
-          background: rgba(7,6,5,0.90);
-          backdrop-filter: blur(20px) saturate(1.5);
-          border-bottom: 1px solid rgba(240,235,228,0.07);
-        }
-        .wmp-nav__inner {
-          max-width: 1360px; margin: 0 auto;
-          padding: 0 44px;
-          display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
-          align-items: stretch;
-        }
-        .wmp-nav__inner::-webkit-scrollbar { display: none; }
-        @media(max-width:640px){ .wmp-nav__inner { padding: 0 20px; } }
+    .wmp-hero-subtitle {
+      font-size: 0.94rem;
+    }
 
-        .wmp-nav-pill {
-          position: relative;
-          white-space: nowrap; padding: 15px 17px;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 11.5px; font-weight: 500; letter-spacing: 0.04em;
-          color: rgba(240,235,228,0.38);
-          border: none; background: transparent; cursor: pointer;
-          flex-shrink: 0; text-decoration: none; display: inline-flex;
-          align-items: center;
-          transition: color 0.22s;
-        }
-        .wmp-nav-pill::after {
-          content: '';
-          position: absolute; bottom: 0; left: 17px; right: 17px;
-          height: 2px; border-radius: 2px 2px 0 0;
-          background: #c8590a;
-          transform: scaleX(0); transform-origin: left;
-          transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
-        }
-        .wmp-nav-pill:hover { color: rgba(240,235,228,0.72); }
-        .wmp-nav-pill.active { color: #c8590a; font-weight: 600; }
-        .wmp-nav-pill.active::after { transform: scaleX(1); }
+    .wmp-section-header {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
 
-        /* ════════════ MENU SECTIONS ════════════ */
-        .wmp-sections {
-          max-width: 1360px; margin: 0 auto;
-          padding: 64px 44px 88px;
-          display: flex; flex-direction: column; gap: 60px;
-        }
-        @media(max-width:640px){ .wmp-sections { padding: 44px 24px 64px; gap: 44px; } }
+    .wmp-section-rule {
+      width: 100%;
+      flex-basis: 100%;
+    }
 
-        /* section header */
-        .wmp-sec-hdr {
-          display: flex; align-items: center; gap: 16px; margin-bottom: 22px;
-        }
-        .wmp-sec-hdr__num {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 52px; font-weight: 300; font-style: italic;
-          color: rgba(200,89,10,0.13); line-height: 1;
-          flex-shrink: 0; letter-spacing: -0.03em;
-        }
-        .wmp-sec-hdr__text { flex-shrink: 0; }
-        .wmp-sec-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(24px, 3vw, 34px);
-          font-weight: 700; color: #f0ebe4; line-height: 1.1;
-        }
-        .wmp-sec-intro {
-          font-size: 13px; color: rgba(240,235,228,0.34);
-          margin-top: 5px; line-height: 1.65; font-weight: 300;
-        }
-        .wmp-sec-hdr__line {
-          flex: 1; height: 1px;
-          background: linear-gradient(90deg, rgba(200,89,10,0.25) 0%, transparent 100%);
-          min-width: 20px;
-        }
+    .wmp-th,
+    .wmp-cell,
+    .wmp-footnote {
+      padding-left: 0.95rem;
+      padding-right: 0.95rem;
+    }
 
-        /* table card */
-        .wmp-table-card {
-          border-radius: 18px; overflow: hidden;
-          border: 1px solid rgba(240,235,228,0.07);
-          background: #0c0a08;
-          transition: border-color 0.38s, box-shadow 0.42s;
-        }
-        .wmp-table-card:hover {
-          border-color: rgba(200,89,10,0.26);
-          box-shadow: 0 24px 64px rgba(0,0,0,0.52);
-        }
-        .wmp-table-wrap { overflow-x: auto; }
-        .wmp-table { width: 100%; border-collapse: collapse; }
+    .wmp-nav-link {
+      padding-left: 0.8rem;
+      padding-right: 0.8rem;
+    }
 
-        /* thead */
-        .wmp-thead-row {
-          background: rgba(200,89,10,0.06);
-          border-bottom: 1px solid rgba(200,89,10,0.12);
-        }
-        .wmp-th {
-          padding: 14px 22px;
-          text-align: left;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 9.5px; font-weight: 700;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: rgba(240,235,228,0.28);
-        }
+    .wmp-nav-link::after {
+      left: 0.8rem;
+      right: 0.8rem;
+    }
 
-        /* rows */
-        .wmp-row {
-          border-bottom: 1px solid rgba(240,235,228,0.04);
-          transition: background 0.18s;
-        }
-        .wmp-row:last-child { border-bottom: none; }
-        .wmp-row:hover { background: rgba(240,235,228,0.025); }
+    .wmp-sections {
+      padding-top: 2.8rem;
+      gap: 2.4rem;
+    }
 
-        .wmp-cell { padding: 15px 22px; vertical-align: top; }
+    .wmp-cta-wrap {
+      padding-bottom: 4rem;
+    }
+  }
 
-        .wmp-item-name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 17.5px; font-weight: 700;
-          color: rgba(240,235,228,0.90); line-height: 1.25;
-        }
-        .wmp-item-desc {
-          font-size: 12px; color: rgba(240,235,228,0.34);
-          line-height: 1.6; font-weight: 300;
-        }
-        .wmp-price {
-          font-family: 'DM Sans', sans-serif;
-          font-size: 13px; font-weight: 600;
-          color: #c8590a; white-space: nowrap;
-        }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
 
-        .wmp-footnote {
-          border-top: 1px solid rgba(240,235,228,0.06);
-          background: rgba(200,89,10,0.035);
-          padding: 13px 22px;
-          font-size: 11.5px; color: rgba(240,235,228,0.26);
-          line-height: 1.65;
-        }
-
-        /* ════════════ BUTTONS ════════════ */
-        .wmp-btn-primary {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 13px 26px; background: #c8590a; color: #fff;
-          font-family: 'DM Sans', sans-serif; font-size: 12.5px;
-          font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-          border-radius: 8px; text-decoration: none;
-          transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
-          position: relative; overflow: hidden;
-        }
-        .wmp-btn-primary::before {
-          content: '';
-          position: absolute; inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 60%);
-          opacity: 0; transition: opacity 0.25s;
-        }
-        .wmp-btn-primary:hover {
-          background: #a84e08; transform: translateY(-2px);
-          box-shadow: 0 10px 30px rgba(200,89,10,0.40);
-        }
-        .wmp-btn-primary:hover::before { opacity: 1; }
-
-        .wmp-btn-outline {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 13px 24px; background: transparent;
-          border: 1px solid rgba(240,235,228,0.15);
-          color: rgba(240,235,228,0.65);
-          font-family: 'DM Sans', sans-serif; font-size: 12.5px;
-          font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
-          border-radius: 8px; text-decoration: none;
-          transition: border-color 0.22s, color 0.22s, background 0.22s, transform 0.22s;
-        }
-        .wmp-btn-outline:hover {
-          border-color: rgba(240,235,228,0.42); color: #f0ebe4;
-          background: rgba(240,235,228,0.05); transform: translateY(-2px);
-        }
-
-        /* ════════════ CTA FOOTER ════════════ */
-        .wmp-cta { max-width: 1360px; margin: 0 auto; padding: 0 44px 108px; }
-        @media(max-width:640px){ .wmp-cta { padding: 0 24px 80px; } }
-
-        .wmp-cta-box {
-          border-radius: 24px; overflow: hidden;
-          background: #c8590a;
-          padding: 72px 60px;
-          display: grid; grid-template-columns: 1fr auto;
-          gap: 36px; align-items: center; position: relative;
-        }
-        @media(max-width:720px){ .wmp-cta-box { grid-template-columns: 1fr; padding: 48px 34px; } }
-
-        .wmp-cta-box::before {
-          content: ''; position: absolute; inset: 0;
-          background:
-            radial-gradient(ellipse 55% 75% at 18% 50%, rgba(255,255,255,0.09) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 55% at 82% 20%, rgba(0,0,0,0.10) 0%, transparent 55%);
-        }
-        .wmp-cta-box__pattern {
-          position: absolute; inset: 0; opacity: 0.035;
-          background-image: repeating-linear-gradient(
-            45deg, #000 0, #000 1px, transparent 0, transparent 50%
-          );
-          background-size: 12px 12px;
-        }
-        .wmp-cta-box__circle {
-          position: absolute; top: -50px; right: -50px;
-          width: 240px; height: 240px; border-radius: 50%;
-          border: 1px solid rgba(255,255,255,0.12); pointer-events: none;
-        }
-        .wmp-cta-box__circle::after {
-          content: ''; position: absolute; inset: 22px;
-          border-radius: 50%; border: 1px solid rgba(255,255,255,0.07);
-        }
-
-        .wmp-cta-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(36px, 4.2vw, 56px);
-          font-weight: 700; color: #fff; line-height: 1.0;
-          position: relative; z-index: 1; letter-spacing: -0.01em;
-        }
-        .wmp-cta-sub {
-          font-size: 14.5px; color: rgba(255,255,255,0.78);
-          margin-top: 10px; position: relative; z-index: 1;
-          font-weight: 300; line-height: 1.72;
-        }
-        .wmp-cta-btns { display: flex; flex-wrap: wrap; gap: 12px; position: relative; z-index: 1; }
-
-        .wmp-btn-dark {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 14px 28px; background: #070605; color: #f0ebe4;
-          font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-          letter-spacing: 0.06em; text-transform: uppercase;
-          border-radius: 8px; text-decoration: none;
-          transition: background 0.22s, transform 0.22s, box-shadow 0.22s;
-        }
-        .wmp-btn-dark:hover { background: #1a1612; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.4); }
-
-        .wmp-btn-ghost {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 14px 28px; background: rgba(255,255,255,0.13); color: #fff;
-          font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-          letter-spacing: 0.06em; text-transform: uppercase;
-          border-radius: 8px; text-decoration: none;
-          border: 1.5px solid rgba(255,255,255,0.30);
-          transition: background 0.22s, transform 0.22s;
-        }
-        .wmp-btn-ghost:hover { background: rgba(255,255,255,0.23); transform: translateY(-2px); }
-
-        @media(prefers-reduced-motion: reduce) {
-          .wmp-shimmer, .wmp-scroll-cue__track::after { animation: none; }
-        }
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
       `}</style>
 
       <div className="wmp-page">
