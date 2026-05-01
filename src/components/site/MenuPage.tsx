@@ -167,8 +167,9 @@ export function MenuPage({ slug }: { slug: LocationSlug }) {
   return (
     <>
       <style>{`
-      font-weight: 700;
-    white-space: nowrap;
+        .wmp-nav-pill {
+          font-weight: 700;
+          white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 
@@ -318,11 +319,11 @@ export function MenuPage({ slug }: { slug: LocationSlug }) {
     *,
     *::before,
     *::after {
-      animation: none !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
     }
-  }
       `}</style>
 
       <div className="wmp-page">
