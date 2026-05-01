@@ -56,7 +56,6 @@ export const Route = createFileRoute("/locations")({
   component: LocationsPage,
 });
 
-type SiteLocation = (typeof LOCATIONS)[number];
 type DetailIcon = ComponentType<{ style?: CSSProperties; className?: string }>;
 
 type LocationSeed = {
@@ -90,6 +89,13 @@ type LocationCardData = {
   accentAngle: string;
   spotlight: string;
 };
+
+type LocationDataOverrides = Partial<
+  Pick<
+    LocationCardData,
+    "name" | "address" | "phone" | "phoneHref" | "hours" | "specialty" | "tagline"
+  >
+>;
 
 const LOCATION_SEEDS: readonly LocationSeed[] = [
   {
@@ -145,7 +151,7 @@ function buildDirectionsUrl(address: string) {
 }
 
 const LOCATION_DATA: readonly LocationCardData[] = LOCATION_SEEDS.map((seed, index) => {
-  const base = LOCATIONS.find((loc) => loc.slug === seed.slug) as SiteLocation | undefined;
+  const base = LOCATIONS.find((loc) => loc.slug === seed.slug) as LocationDataOverrides | undefined;
   const address = base?.address ?? seed.fallbackAddress;
 
   return {
@@ -443,7 +449,8 @@ function LocationsPage() {
     shouldReduceMotion ? ["0%", "0%"] : ["0%", "28%"],
   );
 
-  const establishedYear = Number(SITE.established ?? 2010) || 2010;
+  const establishedYear =
+    Number((SITE as Partial<{ established: number | string }>).established ?? 2010) || 2010;
   const yearsServing = Math.max(1, new Date().getFullYear() - establishedYear);
 
   const heroStats = [
