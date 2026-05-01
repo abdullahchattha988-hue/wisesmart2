@@ -1,1819 +1,2591 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  motion,
-  useScroll,
-  useTransform,
-  useMotionValue,
-  useSpring,
   AnimatePresence,
+  motion,
   useInView,
   useMotionTemplate,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
 } from "framer-motion";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import {
-  ArrowRight, Pizza, Drumstick, Sandwich, Salad,
-  Star, Phone, Clock, Sparkles, MapPin, ChevronDown, Plus,
-  Award, Users, Leaf, Zap, Quote, ChevronRight,
+  ArrowRight,
+  Award,
+  ChevronRight,
+  Clock,
+  Drumstick,
+  Leaf,
+  MapPin,
+  Phone,
+  Pizza,
+  Plus,
+  Salad,
+  Sandwich,
+  Sparkles,
+  Star,
+  Users,
+  Zap,
 } from "lucide-react";
 import { LOCATIONS, SITE } from "@/data/site";
-import heroPizza   from "@/assets/hero-pizza.jpg";
+import heroPizza from "@/assets/hero-pizza.jpg";
 import heroChicken from "@/assets/hero-chicken.jpg";
-import heroSub     from "@/assets/hero-sub.jpg";
-import heroSalad   from "@/assets/hero-salad.jpg";
-import heroSlide   from "@/assets/hero-slide.webp";
-
+import heroSub from "@/assets/hero-sub.jpg";
+import heroSalad from "@/assets/hero-salad.jpg";
+import heroSlide from "@/assets/hero-slide.webp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Wise Mart — Come Hungry. Leave Happy. | Maryland Restaurants Since 2010" },
-      { name: "description", content: "Fresh pizza, famous fried chicken, hearty subs, and crisp salads. Three Maryland locations: Sharptown, East New Market, and Vienna." },
-      { property: "og:title",       content: "Wise Mart — Come Hungry. Leave Happy." },
-      { property: "og:description", content: "Three Maryland locations. Fresh food, fast service, since 2010." },
+      { title: `Wise Mart | Come Hungry. Leave Happy. | Maryland Restaurants Since ${SITE.established}` },
+      {
+        name: "description",
+        content:
+          "Fresh pizza, famous fried chicken, hearty subs, and crisp salads. Three Maryland locations serving fast, satisfying comfort food since 2010.",
+      },
+      { property: "og:title", content: "Wise Mart | Come Hungry. Leave Happy." },
+      {
+        property: "og:description",
+        content:
+          "Fast comfort food with real personality. Three Maryland locations serving pizza, fried chicken, subs, salads, and breakfast favorites.",
+      },
+      { name: "theme-color", content: "#120d09" },
     ],
   }),
   component: HomePage,
 });
-
-/* ─────────────────────────────── data ─────────────────────────────── */
-
 const VALUES = [
-  { icon: Leaf,    title: "Farm Fresh Daily",    desc: "Every ingredient sourced with intention — dough, sauces, and produce prepared in-house each morning." },
-  { icon: Zap,     title: "Lightning Service",   desc: "Speed and quality in perfect harmony. In and out in minutes without compromising taste." },
-  { icon: Award,   title: "Unmatched Value",     desc: "Generous portions, honest prices. Because great food should never feel like a luxury." },
-  { icon: Users,   title: "Community First",     desc: "Three locations. Three towns. One Maryland family built on great food and genuine hospitality." },
+  {
+    icon: Leaf,
+    title: "Prepared Fresh Daily",
+    desc: "Dough, produce, sauces, and salad prep are handled with care every morning so the food tastes alive, not prepackaged.",
+  },
+  {
+    icon: Zap,
+    title: "Fast Without Feeling Rushed",
+    desc: "The service is quick because the system is sharp, not because the standards are low. You get speed and a meal worth stopping for.",
+  },
+  {
+    icon: Award,
+    title: "Neighborhood-Favorite Value",
+    desc: "Big flavor, generous portions, and pricing that still feels grounded. Wise Mart is built for regulars, not one-time splurges.",
+  },
+  {
+    icon: Users,
+    title: "Rooted in Community",
+    desc: "Three Maryland towns, one shared approach: warm hospitality, dependable food, and the kind of place families keep coming back to.",
+  },
 ];
-
 const FEATURED = [
-  { icon: Pizza,     name: "Hand-Stretched Pizza",  price: "from $12.99", img: heroPizza,   tag: "Signature"  },
-  { icon: Drumstick, name: "Famous Fried Chicken",  price: "from $6.99",  img: heroChicken, tag: "Best Seller" },
-  { icon: Sandwich,  name: "Hot Subs & Steaks",     price: "from $11.99", img: heroSub,     tag: "Fan Favorite"},
-  { icon: Salad,     name: "Fresh Salads",           price: "from $9.99",  img: heroSalad,   tag: "Daily Fresh" },
+  {
+    icon: Pizza,
+    name: "Hand-Stretched Pizza",
+    price: "from $12.99",
+    img: heroPizza,
+    tag: "Signature",
+    note: "Bold sauce, bubbling cheese, and the kind of crust that actually earns the word hand-made.",
+  },
+  {
+    icon: Drumstick,
+    name: "Famous Fried Chicken",
+    price: "from $6.99",
+    img: heroChicken,
+    tag: "Best Seller",
+    note: "Golden outside, juicy inside, and one of the biggest reasons locals keep making the drive.",
+  },
+  {
+    icon: Sandwich,
+    name: "Hot Subs and Steaks",
+    price: "from $11.99",
+    img: heroSub,
+    tag: "Fan Favorite",
+    note: "Loaded, satisfying, and built for lunch breaks, road trips, and late-night cravings alike.",
+  },
+  {
+    icon: Salad,
+    name: "Fresh Salads",
+    price: "from $9.99",
+    img: heroSalad,
+    tag: "Daily Fresh",
+    note: "Crisp greens, bright toppings, and enough substance to feel like a real meal, not an afterthought.",
+  },
 ];
-
+const TESTIMONIALS = [
+  {
+    quote: "Best fried chicken on the Eastern Shore. Hands down.",
+    author: "Marcus T.",
+    location: "Sharptown",
+  },
+  {
+    quote: "The breakfast pizza is a game changer. We are regulars now.",
+    author: "Sarah and Jim",
+    location: "Vienna",
+  },
+  {
+    quote: "Cheesesteak subs that actually taste like Philly.",
+    author: "Dee R.",
+    location: "East New Market",
+  },
+];
 const FAQS = [
-  { q: "Do you offer online ordering?",                   a: "Yes! You can place orders through our Order page for any of our three locations. We support pickup and, at select locations, delivery through third-party services." },
-  { q: "What are your hours?",                            a: "Hours vary slightly by location. Generally we're open 10 AM – 10 PM Sunday through Thursday, and 10 AM – 11 PM Friday & Saturday. Check your nearest location page for exact times." },
-  { q: "Do you cater events?",                            a: "Absolutely — catering is one of our specialties. We've covered everything from birthday parties to corporate lunches. Contact your nearest location to get a custom quote." },
-  { q: "Are there vegetarian or vegan options?",          a: "Yes! Our fresh salad bar, veggie subs, and cheese-only pizza options are crowd favorites. We're expanding our plant-based offerings regularly — ask your server for today's specials." },
-  { q: "Can I customize my order?",                       a: "Absolutely. From pizza toppings to sub dressings and salad add-ons, we love building your perfect meal. Just ask at the counter or leave a note when ordering online." },
-  { q: "Do you have a loyalty or rewards program?",       a: "We're working on a formal loyalty program launching soon! In the meantime, follow us on social media for weekly deals and seasonal promotions." },
-  { q: "Are your ingredients locally sourced?",           a: "We prioritize local Maryland farms and suppliers as much as possible. Our produce is delivered fresh several times a week, and our dairy comes from regional creameries." },
-  { q: "Is there parking at all locations?",              a: "Yes, all three locations — Sharptown, East New Market, and Vienna — have free on-site parking with ample space." },
-  { q: "Do you accommodate allergies?",                   a: "We take allergies seriously. Please inform our staff about any dietary restrictions when ordering. While we do our best to prevent cross-contamination, we are not a fully allergen-free kitchen." },
-  { q: "How do I apply for a job at Wise Mart?",          a: "We're always looking for passionate people to join our team. Visit the Careers page or stop by any location and ask to speak with a manager. We'd love to meet you!" },
+  {
+    q: "Do you offer online ordering?",
+    a: "Yes. Guests can place pickup orders through the Order page for any Wise Mart location, and select locations also support delivery through third-party platforms.",
+  },
+  {
+    q: "What are your hours?",
+    a: "Hours can vary by location, but most Wise Mart kitchens run from 10 AM to 10 PM Sunday through Thursday, then 10 AM to 11 PM on Friday and Saturday.",
+  },
+  {
+    q: "Do you cater events?",
+    a: "Absolutely. Wise Mart caters everything from family parties to workplace lunches. Reach out to your nearest location and the team can build a custom order around your event.",
+  },
+  {
+    q: "Are there vegetarian options?",
+    a: "Yes. Fresh salads, veggie-friendly subs, and cheese pizza are regular favorites, and plant-forward choices continue to expand seasonally.",
+  },
+  {
+    q: "Can I customize my order?",
+    a: "Definitely. Toppings, dressings, add-ons, and other modifiers are all part of the experience. If you can picture it, the team will usually make it happen.",
+  },
+  {
+    q: "Do you have a rewards program?",
+    a: "A formal loyalty program is in progress. For now, the best way to catch specials and seasonal promotions is through Wise Mart's social channels and in-store offers.",
+  },
+  {
+    q: "Are your ingredients locally sourced?",
+    a: "Wise Mart prioritizes regional suppliers whenever practical, especially for produce and dairy. The goal is always fresh ingredients with dependable quality.",
+  },
+  {
+    q: "Is parking available?",
+    a: "Yes. All three locations offer free on-site parking, so grabbing a quick order or picking up catering stays easy.",
+  },
+  {
+    q: "Do you accommodate allergies?",
+    a: "The team takes dietary concerns seriously. Guests should mention allergies when ordering so the kitchen can guide them as carefully as possible.",
+  },
+  {
+    q: "How do I apply for a job at Wise Mart?",
+    a: "Visit the Careers page or stop by any location and ask for a manager. Wise Mart is always interested in dependable people who care about hospitality.",
+  },
 ];
-
-/* ─────────────────────────────── hooks ─────────────────────────────── */
-
-function useTilt(strength = 8) {
-  const x       = useMotionValue(0);
-  const y       = useMotionValue(0);
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [strength, -strength]),  { stiffness: 400, damping: 35 });
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-strength, strength]), { stiffness: 400, damping: 35 });
-  const scale   = useSpring(1, { stiffness: 350, damping: 28 });
-
-  function onMove(e: React.MouseEvent<HTMLDivElement>) {
-    const r = e.currentTarget.getBoundingClientRect();
-    x.set((e.clientX - r.left) / r.width  - 0.5);
-    y.set((e.clientY - r.top)  / r.height - 0.5);
-    scale.set(1.02);
-  }
-  function onLeave() { x.set(0); y.set(0); scale.set(1); }
-  return { rotateX, rotateY, scale, onMove, onLeave };
+const MARQUEE_ITEMS = [
+  "Hand-Stretched Pizza",
+  "Famous Fried Chicken",
+  "Hot Subs and Steaks",
+  "Fresh Salads",
+  "Breakfast Favorites",
+  "Catering Trays",
+  "Pickup and Delivery",
+  "Three Maryland Locations",
+];
+const STORY_POINTS = [
+  "House-prepped dough and sauces every morning.",
+  "Fast counter service without sacrificing flavor.",
+  "Breakfast, lunch, dinner, and late-day comfort food.",
+];
+type Location = (typeof LOCATIONS)[number];
+function useFinePointer() {
+  const [finePointer, setFinePointer] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setFinePointer(media.matches);
+    sync();
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", sync);
+      return () => media.removeEventListener("change", sync);
+    }
+    media.addListener(sync);
+    return () => media.removeListener(sync);
+  }, []);
+  return finePointer;
 }
-
-/* ─────────────────────────────── components ─────────────────────────── */
-
-function TiltCard({ children, className, strength }: { children: React.ReactNode; className?: string; strength?: number }) {
-  const { rotateX, rotateY, scale, onMove, onLeave } = useTilt(strength ?? 8);
+function useTilt(enabled: boolean, strength = 8) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [strength, -strength]), {
+    stiffness: 320,
+    damping: 28,
+  });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-strength, strength]), {
+    stiffness: 320,
+    damping: 28,
+  });
+  const scale = useSpring(1, { stiffness: 300, damping: 30 });
+  function onMove(event: React.MouseEvent<HTMLDivElement>) {
+    if (!enabled) {
+      return;
+    }
+    const bounds = event.currentTarget.getBoundingClientRect();
+    x.set((event.clientX - bounds.left) / bounds.width - 0.5);
+    y.set((event.clientY - bounds.top) / bounds.height - 0.5);
+    scale.set(1.015);
+  }
+  function onLeave() {
+    x.set(0);
+    y.set(0);
+    scale.set(1);
+  }
+  return {
+    rotateX: enabled ? rotateX : 0,
+    rotateY: enabled ? rotateY : 0,
+    scale: enabled ? scale : 1,
+    onMove,
+    onLeave,
+  };
+}
+function TiltCard({
+  children,
+  className,
+  enabled,
+  strength = 8,
+  interactive = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  enabled: boolean;
+  strength?: number;
+  interactive?: boolean;
+}) {
+  const { rotateX, rotateY, scale, onMove, onLeave } = useTilt(enabled, strength);
   return (
     <motion.div
-      style={{ rotateX, rotateY, scale, transformStyle: "preserve-3d", perspective: 1200 }}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
       className={className}
+      data-cursor={interactive ? "interactive" : undefined}
+      onMouseMove={enabled ? onMove : undefined}
+      onMouseLeave={enabled ? onLeave : undefined}
+      style={{
+        rotateX,
+        rotateY,
+        scale,
+        transformPerspective: 1400,
+        transformStyle: "preserve-3d",
+      }}
     >
       {children}
     </motion.div>
   );
 }
-
+function SectionIntro({
+  eyebrow,
+  title,
+  body,
+  align = "left",
+  action,
+}: {
+  eyebrow: string;
+  title: ReactNode;
+  body?: ReactNode;
+  align?: "left" | "center";
+  action?: ReactNode;
+}) {
+  return (
+    <div className={`wm-intro wm-intro--${align}`}>
+      <span className="wm-eyebrow">
+        <span className="wm-eyebrow__line" />
+        {eyebrow}
+        <span className="wm-eyebrow__line" />
+      </span>
+      <h2 className="wm-display wm-section-title">{title}</h2>
+      {body ? <div className="wm-section-sub">{body}</div> : null}
+      {action ? <div className="wm-intro__action">{action}</div> : null}
+    </div>
+  );
+}
+function CountUp({
+  to,
+  suffix = "",
+  decimals = 0,
+}: {
+  to: number;
+  suffix?: string;
+  decimals?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const prefersReducedMotion = useReducedMotion();
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!inView) {
+      return;
+    }
+    if (prefersReducedMotion) {
+      setValue(to);
+      return;
+    }
+    let frame = 0;
+    const start = performance.now();
+    const duration = 1100;
+    const tick = (time: number) => {
+      const progress = Math.min((time - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(to * eased);
+      if (progress < 1) {
+        frame = window.requestAnimationFrame(tick);
+      }
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [inView, prefersReducedMotion, to]);
+  const formatted = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
+  return (
+    <span ref={ref}>
+      {formatted}
+      {suffix}
+    </span>
+  );
+}
 function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
   const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const buttonId = `${panelId}-button`;
   return (
     <motion.div
       className="wm-faq-item"
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
     >
-      <button className={`wm-faq-btn${open ? " wm-faq-btn--open" : ""}`} onClick={() => setOpen(!open)}>
-        <span className="wm-faq-q">{q}</span>
+      <button
+        id={buttonId}
+        type="button"
+        className={`wm-faq-button${open ? " is-open" : ""}`}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className="wm-faq-question">{q}</span>
         <motion.span
           className="wm-faq-icon"
-          animate={{ rotate: open ? 45 : 0, background: open ? "var(--amber)" : "var(--amber-pale)" }}
-          transition={{ type: "spring", stiffness: 450, damping: 28 }}
+          animate={{
+            rotate: open ? 45 : 0,
+            backgroundColor: open ? "rgba(235, 113, 38, 0.2)" : "rgba(235, 113, 38, 0.08)",
+          }}
+          transition={{ type: "spring", stiffness: 420, damping: 28 }}
         >
-          <Plus style={{ width: 13, height: 13 }} />
+          <Plus />
         </motion.span>
       </button>
       <AnimatePresence initial={false}>
-        {open && (
+        {open ? (
           <motion.div
-            className="wm-faq-a"
+            id={panelId}
+            role="region"
+            aria-labelledby={buttonId}
+            className="wm-faq-answer"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.36, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: "hidden" }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
           >
-            <div className="wm-faq-a-inner">{a}</div>
+            <div className="wm-faq-answer__inner">{a}</div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </motion.div>
   );
 }
-
-function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = Math.ceil(to / 40);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= to) { setCount(to); clearInterval(timer); }
-      else setCount(start);
-    }, 35);
-    return () => clearInterval(timer);
-  }, [inView, to]);
-
-  return <span ref={ref}>{count}{suffix}</span>;
+function LocationCard({ location, index }: { location: Location; index: number }) {
+  return (
+    <motion.article
+      className="wm-location-card"
+      initial={{ opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      data-cursor="interactive"
+    >
+      <div className="wm-location-card__glow" />
+      <div className="wm-location-card__head">
+        <span className="wm-location-card__kicker">0{index + 1} / Maryland</span>
+        <span className="wm-location-card__specialty">{location.specialty}</span>
+      </div>
+      <h3 className="wm-display wm-location-card__title">{location.name}</h3>
+      <p className="wm-location-card__copy">{location.tagline}</p>
+      <div className="wm-location-card__rail" />
+      <div className="wm-location-card__actions">
+        <Link to="/locations" className="wm-button wm-button--primary wm-button--small">
+          Explore Location <ArrowRight />
+        </Link>
+        <a href={location.phoneHref} className="wm-location-card__phone">
+          <Phone />
+          {location.phone}
+        </a>
+      </div>
+    </motion.article>
+  );
 }
-
-/* ─────────────────────────────── page ─────────────────────────────── */
-
+function FeaturedCard({
+  item,
+  index,
+  tiltEnabled,
+}: {
+  item: (typeof FEATURED)[number];
+  index: number;
+  tiltEnabled: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 32, scale: 0.96 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.58, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <TiltCard className="wm-feature-card" enabled={tiltEnabled} strength={6} interactive>
+        <div className="wm-feature-card__media">
+          <img src={item.img} alt={item.name} loading="lazy" />
+          <div className="wm-feature-card__scrim" />
+          <span className="wm-feature-card__badge">
+            <item.icon />
+          </span>
+        </div>
+        <div className="wm-feature-card__body">
+          <div className="wm-feature-card__eyebrow-row">
+            <span className="wm-feature-card__tag">{item.tag}</span>
+            <span className="wm-feature-card__index">0{index + 1}</span>
+          </div>
+          <h3 className="wm-display wm-feature-card__title">{item.name}</h3>
+          <p className="wm-feature-card__copy">{item.note}</p>
+          <div className="wm-feature-card__footer">
+            <span className="wm-feature-card__price">{item.price}</span>
+            <Link to="/order" className="wm-link">
+              Order This <ChevronRight />
+            </Link>
+          </div>
+        </div>
+      </TiltCard>
+    </motion.div>
+  );
+}
+function ReviewCard({
+  quote,
+  author,
+  location,
+  index,
+  tiltEnabled,
+}: {
+  quote: string;
+  author: string;
+  location: string;
+  index: number;
+  tiltEnabled: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28, scale: 0.96 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.56, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <TiltCard className="wm-review-card" enabled={tiltEnabled} strength={5} interactive>
+        <span className="wm-review-card__quote-mark">"</span>
+        <div className="wm-review-card__stars">
+          {Array.from({ length: 5 }).map((_, starIndex) => (
+            <Star key={starIndex} />
+          ))}
+        </div>
+        <p className="wm-review-card__quote">"{quote}"</p>
+        <div className="wm-review-card__rail" />
+        <div className="wm-review-card__author">{author}</div>
+        <div className="wm-review-card__location">
+          <MapPin />
+          {location}
+        </div>
+      </TiltCard>
+    </motion.div>
+  );
+}
 function HomePage() {
   const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const bgY       = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const textY     = useTransform(scrollYProgress, [0, 1], ["0%", "28%"]);
-  const bgOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
-  const bgScale   = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-
-  const [cursorPos, setCursorPos]       = useState({ x: 0, y: 0 });
+  const established = Number(SITE.established);
+  const yearsServing = Math.max(new Date().getFullYear() - established, 1);
+  const prefersReducedMotion = useReducedMotion();
+  const finePointer = useFinePointer();
+  const interactiveMotion = finePointer && !prefersReducedMotion;
+  const { scrollYProgress: pageProgress } = useScroll();
+  const progress = useSpring(pageProgress, { stiffness: 180, damping: 26 });
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroY = useTransform(heroProgress, [0, 1], interactiveMotion ? ["0%", "18%"] : ["0%", "0%"]);
+  const heroScale = useTransform(heroProgress, [0, 1], interactiveMotion ? [1, 1.08] : [1, 1]);
+  const heroOpacity = useTransform(heroProgress, [0, 0.9], [1, 0.05]);
+  const copyY = useTransform(heroProgress, [0, 1], interactiveMotion ? ["0%", "12%"] : ["0%", "0%"]);
+  const pointerX = useMotionValue(-160);
+  const pointerY = useMotionValue(-160);
+  const cursorX = useSpring(pointerX, { stiffness: 500, damping: 40, mass: 0.25 });
+  const cursorY = useSpring(pointerY, { stiffness: 500, damping: 40, mass: 0.25 });
+  const cursorAura = useMotionTemplate`radial-gradient(440px circle at ${cursorX}px ${cursorY}px, rgba(235, 113, 38, 0.18) 0%, rgba(235, 113, 38, 0.09) 24%, transparent 62%)`;
   const [cursorVisible, setCursorVisible] = useState(false);
-  const [cursorHover, setCursorHover]   = useState(false);
-
+  const [cursorHover, setCursorHover] = useState(false);
   useEffect(() => {
-    const onMove  = (e: MouseEvent) => { setCursorPos({ x: e.clientX, y: e.clientY }); setCursorVisible(true); };
-    const onLeave = () => setCursorVisible(false);
-    window.addEventListener("mousemove", onMove);
-    document.body.addEventListener("mouseleave", onLeave);
-
-    const hoverEls = () => document.querySelectorAll("a, button, [data-cursor]");
-    const enterHover = () => setCursorHover(true);
-    const leaveHover = () => setCursorHover(false);
-
-    const attach = () => {
-      hoverEls().forEach(el => {
-        el.addEventListener("mouseenter", enterHover);
-        el.addEventListener("mouseleave", leaveHover);
-      });
+    if (!interactiveMotion) {
+      setCursorVisible(false);
+      setCursorHover(false);
+      return;
+    }
+    const onPointerMove = (event: PointerEvent) => {
+      pointerX.set(event.clientX);
+      pointerY.set(event.clientY);
+      setCursorVisible(true);
     };
-    attach();
-    const mo = new MutationObserver(attach);
-    mo.observe(document.body, { childList: true, subtree: true });
-
+    const onPointerOver = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return;
+      }
+      setCursorHover(Boolean(target.closest("a, button, [data-cursor='interactive']")));
+    };
+    const onPointerOut = (event: PointerEvent) => {
+      const nextTarget = event.relatedTarget;
+      if (nextTarget instanceof Element && nextTarget.closest("a, button, [data-cursor='interactive']")) {
+        return;
+      }
+      setCursorHover(false);
+    };
+    const onHideCursor = () => setCursorVisible(false);
+    window.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerover", onPointerOver);
+    document.addEventListener("pointerout", onPointerOut);
+    document.documentElement.addEventListener("mouseleave", onHideCursor);
+    window.addEventListener("blur", onHideCursor);
     return () => {
-      window.removeEventListener("mousemove", onMove);
-      document.body.removeEventListener("mouseleave", onLeave);
-      mo.disconnect();
+      window.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerover", onPointerOver);
+      document.removeEventListener("pointerout", onPointerOut);
+      document.documentElement.removeEventListener("mouseleave", onHideCursor);
+      window.removeEventListener("blur", onHideCursor);
     };
-  }, []);
-
+  }, [interactiveMotion, pointerX, pointerY]);
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
         :root {
-          --amber:        #c8590a;
-          --amber-mid:    #d96b18;
-          --amber-light:  #f0872e;
-          --amber-pale:   rgba(200,89,10,0.10);
-          --amber-glow:   rgba(200,89,10,0.22);
-          --amber-border: rgba(200,89,10,0.28);
-          --gold:         #e8a030;
-          --gold-pale:    rgba(232,160,48,0.12);
-
-          --white:        #ffffff;
-          --cream:        #faf6f1;
-          --off-white:    #f0ebe4;
-
-          --ink:          #070605;
-          --ink-1:        #0c0a09;
-          --ink-2:        #111009;
-          --ink-3:        #181510;
-          --ink-4:        #1e1a14;
-          --ink-5:        #252018;
-
-          --text-primary: rgba(240,235,228,0.95);
-          --text-secondary: rgba(240,235,228,0.52);
-          --text-muted:   rgba(240,235,228,0.28);
-          --text-faint:   rgba(240,235,228,0.14);
-
-          --border:       rgba(240,235,228,0.07);
-          --border-mid:   rgba(240,235,228,0.12);
-          --border-warm:  rgba(240,235,228,0.18);
-
-          --r-xs: 6px;
-          --r-sm: 10px;
-          --r-md: 16px;
-          --r-lg: 22px;
-          --r-xl: 30px;
-          --r-2xl: 40px;
-
-          --shadow-sm:  0 2px 12px rgba(0,0,0,0.35);
-          --shadow-md:  0 8px 32px rgba(0,0,0,0.45);
-          --shadow-lg:  0 20px 60px rgba(0,0,0,0.55);
-          --shadow-xl:  0 40px 100px rgba(0,0,0,0.65);
-          --shadow-amber: 0 16px 48px rgba(200,89,10,0.35);
-          --shadow-amber-lg: 0 24px 64px rgba(200,89,10,0.42);
+          --wm-ink: #120d09;
+          --wm-ink-soft: #1a130f;
+          --wm-ink-raised: #221913;
+          --wm-ink-panel: rgba(24, 17, 12, 0.76);
+          --wm-ink-panel-strong: rgba(18, 13, 9, 0.9);
+          --wm-paper: #f7efe3;
+          --wm-paper-soft: #fbf6ef;
+          --wm-paper-muted: #e8dccd;
+          --wm-text: rgba(250, 244, 237, 0.96);
+          --wm-text-soft: rgba(250, 244, 237, 0.72);
+          --wm-text-faint: rgba(250, 244, 237, 0.48);
+          --wm-ink-text: #271d16;
+          --wm-ink-text-soft: rgba(39, 29, 22, 0.72);
+          --wm-amber: #eb7126;
+          --wm-amber-deep: #c95a12;
+          --wm-amber-soft: rgba(235, 113, 38, 0.14);
+          --wm-amber-border: rgba(235, 113, 38, 0.3);
+          --wm-gold: #f2bc59;
+          --wm-border: rgba(250, 244, 237, 0.12);
+          --wm-border-soft: rgba(250, 244, 237, 0.08);
+          --wm-shadow-lg: 0 26px 70px rgba(0, 0, 0, 0.36);
+          --wm-shadow-xl: 0 40px 110px rgba(0, 0, 0, 0.48);
+          --wm-shadow-amber: 0 20px 48px rgba(201, 90, 18, 0.28);
+          --wm-radius-sm: 14px;
+          --wm-radius-md: 20px;
+          --wm-radius-lg: 28px;
+          --wm-radius-xl: 38px;
         }
-
-        html { scroll-behavior: smooth; }
-
+        * {
+          box-sizing: border-box;
+        }
+        html {
+          scroll-behavior: smooth;
+        }
+        body {
+          margin: 0;
+          background: var(--wm-ink);
+        }
+        img {
+          display: block;
+          max-width: 100%;
+        }
         .wm-page {
-          font-family: 'DM Sans', sans-serif;
-          background: var(--ink);
-          color: var(--text-primary);
-          overflow-x: hidden;
+          position: relative;
+          overflow-x: clip;
+          color: var(--wm-text);
+          background:
+            radial-gradient(circle at 10% 0%, rgba(235, 113, 38, 0.1), transparent 28%),
+            radial-gradient(circle at 92% 18%, rgba(242, 188, 89, 0.07), transparent 22%),
+            linear-gradient(180deg, #120d09 0%, #15100c 46%, #120d09 100%);
+          font-family: "Manrope", sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-
-        .wm-page::-webkit-scrollbar { width: 3px; }
-        .wm-page::-webkit-scrollbar-track { background: var(--ink); }
-        .wm-page::-webkit-scrollbar-thumb { background: var(--amber); border-radius: 2px; }
-
-        /* ── custom cursor ── */
+        .wm-page__glow {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 3;
+        }
+        .wm-progress {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          transform-origin: left center;
+          background: linear-gradient(90deg, #ffcf80 0%, #eb7126 45%, #b54d0c 100%);
+          z-index: 30;
+        }
+        .wm-cursor-outer,
+        .wm-cursor-inner {
+          position: fixed;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          z-index: 31;
+        }
         .wm-cursor-outer {
-          position: fixed; top: 0; left: 0;
-          width: 36px; height: 36px;
-          border: 1px solid var(--amber);
-          border-radius: 50%;
-          pointer-events: none; z-index: 9999;
-          transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s, opacity 0.25s;
-          transform-origin: center;
-          mix-blend-mode: normal;
+          width: 44px;
+          height: 44px;
+          margin-top: -22px;
+          margin-left: -22px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 207, 128, 0.6);
+          background: rgba(235, 113, 38, 0.08);
+          transition:
+            width 0.24s ease,
+            height 0.24s ease,
+            margin 0.24s ease,
+            border-color 0.24s ease,
+            background 0.24s ease;
         }
         .wm-cursor-outer.is-hover {
-          width: 56px; height: 56px;
-          background: var(--amber-pale);
-          border-color: var(--amber-mid);
+          width: 68px;
+          height: 68px;
+          margin-top: -34px;
+          margin-left: -34px;
+          border-color: rgba(255, 207, 128, 0.8);
+          background: rgba(235, 113, 38, 0.16);
         }
         .wm-cursor-inner {
-          position: fixed; top: 0; left: 0;
-          width: 5px; height: 5px;
-          background: var(--amber);
-          border-radius: 50%;
-          pointer-events: none; z-index: 10000;
-          transition: opacity 0.25s;
+          width: 8px;
+          height: 8px;
+          margin-top: -4px;
+          margin-left: -4px;
+          border-radius: 999px;
+          background: #ffcf80;
+          box-shadow: 0 0 24px rgba(255, 207, 128, 0.55);
         }
-
-        /* ── layout ── */
-        .wm-section { max-width: 1360px; margin: 0 auto; padding: 0 32px; }
-        @media(min-width:768px)  { .wm-section { padding: 0 52px; } }
-        @media(min-width:1280px) { .wm-section { padding: 0 72px; } }
-
-        /* ── eyebrow ── */
+        .wm-section {
+          width: min(1320px, calc(100vw - 32px));
+          margin: 0 auto;
+        }
+        .wm-display {
+          font-family: "Fraunces", Georgia, serif;
+          font-weight: 600;
+          letter-spacing: -0.03em;
+          line-height: 0.98;
+        }
+        .wm-display em {
+          font-style: italic;
+          color: #ffd08d;
+        }
+        .wm-intro {
+          position: relative;
+        }
+        .wm-intro--center {
+          text-align: center;
+        }
         .wm-eyebrow {
-          display: inline-flex; align-items: center; gap: 10px;
-          font-size: 9px; font-weight: 600; letter-spacing: 0.28em;
-          text-transform: uppercase; color: var(--amber);
-          font-family: 'DM Sans', sans-serif;
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: #ffcf80;
         }
-        .wm-eyebrow-line {
-          display: block; width: 28px; height: 1px;
-          background: linear-gradient(90deg, var(--amber), transparent);
+        .wm-eyebrow__line {
+          width: 30px;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(255, 207, 128, 0.95), transparent);
+          display: inline-block;
+        }
+        .wm-section-title {
+          margin: 18px 0 0;
+          font-size: clamp(42px, 5vw, 76px);
+        }
+        .wm-section-sub {
+          margin-top: 16px;
+          max-width: 650px;
+          font-size: 15px;
+          line-height: 1.8;
+          color: var(--wm-text-soft);
+        }
+        .wm-intro--center .wm-section-sub {
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .wm-intro__action {
+          margin-top: 22px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+        .wm-intro--center .wm-intro__action {
+          justify-content: center;
+        }
+        .wm-button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          min-height: 52px;
+          padding: 0 24px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          text-decoration: none;
+          transition:
+            transform 0.24s ease,
+            box-shadow 0.24s ease,
+            background 0.24s ease,
+            border-color 0.24s ease,
+            color 0.24s ease;
+        }
+        .wm-button svg,
+        .wm-link svg,
+        .wm-location-card__phone svg,
+        .wm-review-card__location svg {
+          width: 14px;
+          height: 14px;
           flex-shrink: 0;
         }
-
-        /* ── display type ── */
-        .wm-display {
-          font-family: 'Cormorant Garamond', Georgia, serif;
+        .wm-button--primary {
+          color: white;
+          background: linear-gradient(135deg, #f18b3e 0%, #eb7126 48%, #c95a12 100%);
+          box-shadow: var(--wm-shadow-amber);
+        }
+        .wm-button--primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 26px 58px rgba(201, 90, 18, 0.4);
+        }
+        .wm-button--ghost {
+          color: var(--wm-text);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(12px);
+        }
+        .wm-button--ghost:hover {
+          transform: translateY(-2px);
+          border-color: rgba(255, 255, 255, 0.26);
+          background: rgba(255, 255, 255, 0.08);
+        }
+        .wm-button--dark {
+          color: var(--wm-paper);
+          background: rgba(13, 9, 6, 0.82);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .wm-button--dark:hover {
+          transform: translateY(-2px);
+          background: rgba(18, 13, 9, 0.96);
+        }
+        .wm-button--small {
+          min-height: 44px;
+          padding: 0 18px;
+          font-size: 11px;
+          letter-spacing: 0.14em;
+        }
+        .wm-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: #ffcf80;
+          text-decoration: none;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          transition: gap 0.22s ease, color 0.22s ease;
+        }
+        .wm-link:hover {
+          gap: 14px;
+          color: white;
+        }
+        .wm-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 14px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid var(--wm-border);
+          color: var(--wm-text-soft);
+          font-size: 11px;
           font-weight: 700;
-          line-height: 0.95;
-          letter-spacing: -0.01em;
-          color: var(--text-primary);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          backdrop-filter: blur(12px);
         }
-        .wm-display em { font-style: italic; color: var(--amber-light); }
-        .wm-section-title { font-size: clamp(40px, 4.4vw, 64px); margin-top: 16px; }
-        .wm-section-sub {
-          font-size: 14px; color: var(--text-secondary); margin-top: 14px;
-          line-height: 1.75; max-width: 460px; font-weight: 300;
+        .wm-chip svg {
+          width: 13px;
+          height: 13px;
+          color: #ffcf80;
         }
-
-        /* ── divider ── */
-        .wm-divider {
-          height: 1px;
-          background: linear-gradient(90deg, transparent 0%, var(--border-mid) 30%, var(--border-mid) 70%, transparent 100%);
-        }
-
-        /* ════════════════════════════════════════
-           HERO
-        ════════════════════════════════════════ */
         .wm-hero {
           position: relative;
           min-height: 100svh;
+          display: flex;
+          align-items: stretch;
           overflow: hidden;
-          background: var(--ink);
-          display: flex; flex-direction: column; justify-content: flex-end;
         }
-
         .wm-hero__bg {
-          position: absolute; inset: -6%;
-          background-size: cover; background-position: center;
+          position: absolute;
+          inset: -6%;
+          background-position: center;
+          background-size: cover;
           will-change: transform;
         }
-
-        /* layered gradient overlay — warm cinematic feel */
         .wm-hero__overlay {
-          position: absolute; inset: 0;
+          position: absolute;
+          inset: 0;
           background:
-            linear-gradient(105deg,
-              rgba(7,6,5,0.97) 0%,
-              rgba(7,6,5,0.88) 38%,
-              rgba(7,6,5,0.55) 66%,
-              rgba(7,6,5,0.22) 100%
-            ),
-            linear-gradient(to top,
-              rgba(7,6,5,1.0) 0%,
-              rgba(7,6,5,0.0) 45%
-            );
+            linear-gradient(110deg, rgba(9, 6, 4, 0.94) 0%, rgba(9, 6, 4, 0.82) 42%, rgba(9, 6, 4, 0.38) 74%, rgba(9, 6, 4, 0.12) 100%),
+            linear-gradient(180deg, rgba(9, 6, 4, 0.35) 0%, rgba(9, 6, 4, 0.94) 100%);
         }
-
-        /* subtle amber vignette at bottom-left */
-        .wm-hero__amber-wash {
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse 80% 60% at 10% 85%, rgba(200,89,10,0.12) 0%, transparent 60%);
+        .wm-hero__noise {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          opacity: 0.05;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+          background-size: 170px 170px;
+        }
+        .wm-hero__beam,
+        .wm-hero__orb {
+          position: absolute;
           pointer-events: none;
         }
-
-        /* grain overlay */
-        .wm-hero__grain {
-          position: absolute; inset: 0;
-          opacity: 0.032; pointer-events: none; z-index: 1;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-          background-size: 180px 180px;
+        .wm-hero__beam {
+          inset: auto -10% 8% auto;
+          width: 45vw;
+          height: 45vw;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(242, 188, 89, 0.12) 0%, rgba(235, 113, 38, 0.08) 25%, transparent 70%);
+          filter: blur(16px);
         }
-
-        /* floating orb lights */
         .wm-hero__orb {
-          position: absolute; border-radius: 50%; pointer-events: none; z-index: 1;
-          filter: blur(80px);
+          inset: 12% auto auto 8%;
+          width: 260px;
+          height: 260px;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(235, 113, 38, 0.18) 0%, transparent 68%);
+          filter: blur(28px);
         }
-        .wm-hero__orb--1 {
-          width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(200,89,10,0.14) 0%, transparent 70%);
-          bottom: -100px; left: -80px;
-        }
-        .wm-hero__orb--2 {
-          width: 320px; height: 320px;
-          background: radial-gradient(circle, rgba(232,160,48,0.07) 0%, transparent 70%);
-          top: 20%; right: 5%;
-        }
-
-        /* animated scan line */
-        .wm-hero__scanline {
-          position: absolute; left: 0; right: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent 0%, var(--amber-glow) 30%, var(--amber) 50%, var(--amber-glow) 70%, transparent 100%);
-          opacity: 0;
-          pointer-events: none; z-index: 2;
-          animation: scanlineAnim 7s ease-in-out infinite 1.5s;
-        }
-        @keyframes scanlineAnim {
-          0%   { top: 0%;   opacity: 0; }
-          5%   { opacity: 0.7; }
-          95%  { opacity: 0.5; }
-          100% { top: 100%; opacity: 0; }
-        }
-
-        /* floating particles */
-        .wm-particles {
-          position: absolute; inset: 0; overflow: hidden;
-          pointer-events: none; z-index: 2;
-        }
-        .wm-particle {
-          position: absolute; border-radius: 50%;
-        }
-
         .wm-hero__inner {
-          position: relative; z-index: 3;
-          max-width: 1360px; margin: 0 auto;
-          padding: 140px 32px 96px;
-          display: grid; grid-template-columns: 1fr;
-          gap: 60px; align-items: end;
+          position: relative;
+          z-index: 2;
+          display: grid;
+          gap: 54px;
+          grid-template-columns: 1fr;
+          align-items: center;
+          padding: 132px 0 96px;
         }
-        @media(min-width:768px)  { .wm-hero__inner { padding: 150px 52px 108px; } }
-        @media(min-width:1024px) {
-          .wm-hero__inner {
-            grid-template-columns: 54fr 46fr;
-            padding: 168px 72px 120px;
-            align-items: end;
+        .wm-hero__copy {
+          max-width: 670px;
+        }
+        .wm-hero__badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          padding: 9px 16px 9px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(14px);
+        }
+        .wm-hero__badge-icon {
+          width: 30px;
+          height: 30px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #f4a756 0%, #eb7126 100%);
+          box-shadow: 0 0 0 5px rgba(235, 113, 38, 0.12);
+        }
+        .wm-hero__badge-icon svg {
+          width: 14px;
+          height: 14px;
+          color: white;
+        }
+        .wm-hero__badge-copy {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--wm-text-soft);
+        }
+        .wm-hero__badge-copy strong {
+          color: white;
+        }
+        .wm-hero__title {
+          margin: 28px 0 0;
+          font-size: clamp(62px, 9vw, 118px);
+        }
+        .wm-hero__line {
+          display: block;
+          overflow: hidden;
+        }
+        .wm-hero__line span {
+          display: block;
+        }
+        .wm-hero__line--accent span {
+          background: linear-gradient(90deg, #ffe3b1 0%, #f4a756 22%, #eb7126 55%, #ffcf80 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          animation: wm-shimmer 7s linear infinite;
+          background-size: 220% auto;
+        }
+        @keyframes wm-shimmer {
+          0% {
+            background-position: 0% center;
+          }
+          100% {
+            background-position: 200% center;
           }
         }
-
-        /* pedigree badge */
-        .wm-hero__badge {
-          display: inline-flex; align-items: center; gap: 10px;
-          padding: 9px 18px 9px 9px;
-          background: rgba(240,235,228,0.05);
-          border: 1px solid var(--border-mid);
-          border-radius: 100px;
-          backdrop-filter: blur(8px);
-          margin-bottom: 32px;
-        }
-        .wm-hero__badge-dot {
-          width: 28px; height: 28px; border-radius: 50%;
-          background: var(--amber);
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-          box-shadow: 0 0 0 4px var(--amber-pale);
-          animation: badgePulse 3s ease-in-out infinite;
-        }
-        @keyframes badgePulse {
-          0%,100% { box-shadow: 0 0 0 4px var(--amber-pale); }
-          50%     { box-shadow: 0 0 0 8px rgba(200,89,10,0.08); }
-        }
-        .wm-hero__badge-dot svg { width: 13px; height: 13px; color: #fff; }
-        .wm-hero__badge-text {
-          font-size: 10px; font-weight: 500; letter-spacing: 0.14em;
-          text-transform: uppercase; color: var(--text-secondary);
-        }
-        .wm-hero__badge-text strong { color: var(--text-primary); font-weight: 600; }
-
-        .wm-hero__title {
-          font-size: clamp(58px, 7.8vw, 112px);
-          margin-top: 0;
-          position: relative;
-        }
-        .wm-hero__title-line { display: block; overflow: hidden; }
-        .wm-hero__title-inner { display: block; }
-
-        /* liquid shimmer — amber spectrum */
-        .wm-shimmer {
-          background: linear-gradient(92deg,
-            #c8590a 0%, #e8812a 20%, #f5b040 38%,
-            #fbc95a 50%, #e8812a 65%, #d06820 82%, #c8590a 100%
-          );
-          background-size: 300% auto;
-          -webkit-background-clip: text; background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: liquidShimmer 5.5s linear infinite;
-        }
-        @keyframes liquidShimmer {
-          0%   { background-position: -150% center; }
-          100% { background-position:  150% center; }
-        }
-
         .wm-hero__sub {
-          font-size: 15px; color: var(--text-secondary); line-height: 1.85;
-          margin-top: 26px; max-width: 420px; font-weight: 300;
+          margin: 24px 0 0;
+          max-width: 560px;
+          font-size: 16px;
+          line-height: 1.85;
+          color: var(--wm-text-soft);
         }
-
-        .wm-hero__ctas {
-          display: flex; flex-wrap: wrap; gap: 12px; margin-top: 44px;
+        .wm-hero__actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px;
+          margin-top: 34px;
+        }
+        .wm-hero__chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 28px;
+        }
+        .wm-hero__signals {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+          margin-top: 34px;
+          max-width: 620px;
+        }
+        .wm-hero__signal {
+          padding: 18px 18px 17px;
+          border-radius: 22px;
+          border: 1px solid var(--wm-border);
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(14px);
+        }
+        .wm-hero__signal-top {
+          display: flex;
           align-items: center;
+          gap: 10px;
+          color: #ffcf80;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
         }
-
-        /* trust signals */
-        .wm-hero__trust {
-          display: flex; align-items: center; gap: 16px;
-          margin-top: 40px; padding-top: 36px;
-          border-top: 1px solid var(--border);
+        .wm-hero__signal-copy {
+          margin-top: 10px;
+          font-size: 13px;
+          line-height: 1.7;
+          color: var(--wm-text-soft);
         }
-        .wm-hero__trust-item {
-          display: flex; align-items: center; gap: 7px;
-          font-size: 11px; color: var(--text-muted); font-weight: 400;
-          letter-spacing: 0.04em;
+        .wm-showcase {
+          position: relative;
+          display: grid;
+          gap: 16px;
+          align-self: stretch;
         }
-        .wm-hero__trust-item svg { width: 12px; height: 12px; color: var(--amber); flex-shrink: 0; }
-        .wm-hero__trust-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border-warm); flex-shrink: 0; }
-
-        /* ── hero right card stack ── */
-        .wm-hero__right { display: none; }
-        @media(min-width:1024px){ .wm-hero__right { display: block; position: relative; height: 560px; } }
-
-        .wm-food-card {
-          position: absolute;
-          border-radius: var(--r-lg);
+        .wm-showcase__hero {
+          position: relative;
+          min-height: 420px;
           overflow: hidden;
-          border: 1px solid var(--border-mid);
-          background: rgba(14,11,9,0.82);
-          backdrop-filter: blur(20px) saturate(1.2);
-          transition: border-color 0.4s, box-shadow 0.4s;
-          cursor: default;
-          box-shadow: var(--shadow-md);
+          border-radius: var(--wm-radius-xl);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          box-shadow: var(--wm-shadow-xl);
+          background: rgba(255, 255, 255, 0.04);
         }
-        .wm-food-card:hover {
-          border-color: var(--amber-border);
-          box-shadow: var(--shadow-lg), 0 0 0 1px rgba(200,89,10,0.10);
+        .wm-showcase__hero img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
-        .wm-food-card__img { position: relative; overflow: hidden; }
-        .wm-food-card__img img {
-          width: 100%; height: 170px; object-fit: cover; display: block;
-          transition: transform 0.9s cubic-bezier(0.16,1,0.3,1);
+        .wm-showcase__hero::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, rgba(10, 7, 5, 0.1) 0%, rgba(10, 7, 5, 0.16) 34%, rgba(10, 7, 5, 0.9) 100%);
         }
-        .wm-food-card:hover .wm-food-card__img img { transform: scale(1.08); }
-        .wm-food-card__img-overlay {
-          position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(7,6,5,0.55) 0%, transparent 55%);
+        .wm-showcase__hero-copy {
+          position: absolute;
+          inset: auto 26px 24px 26px;
+          z-index: 1;
         }
-        .wm-food-card__body { padding: 14px 16px 16px; }
-        .wm-food-card__tag {
-          font-size: 8.5px; font-weight: 700; letter-spacing: 0.22em;
-          text-transform: uppercase; color: var(--amber); margin-bottom: 4px;
+        .wm-showcase__label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #ffe1aa;
+          backdrop-filter: blur(12px);
         }
-        .wm-food-card__name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
-        .wm-food-card__price { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; font-weight: 300; }
-
-        /* stacked card positions — refined angles */
-        .wm-food-card--0 { width: 198px; top:  0px;  left:  10px;  z-index: 4; transform: rotate(-2.8deg); }
-        .wm-food-card--1 { width: 208px; top:  30px;  left: 195px;  z-index: 5; transform: rotate(1.8deg);  }
-        .wm-food-card--2 { width: 194px; top: 268px; left:  18px;  z-index: 3; transform: rotate(2.2deg);  }
-        .wm-food-card--3 { width: 206px; top: 252px; left: 205px;  z-index: 6; transform: rotate(-1.2deg); }
-
-        /* connector lines between cards */
-        .wm-hero__card-line {
-          position: absolute; pointer-events: none; z-index: 2;
-          top: 50%; left: 50%; transform: translate(-50%,-50%);
-          width: 1px; height: 130px;
-          background: linear-gradient(to bottom, transparent, var(--border-mid), transparent);
+        .wm-showcase__title {
+          margin: 18px 0 0;
+          font-size: clamp(32px, 4vw, 48px);
+          line-height: 1.02;
         }
-
-        /* scroll cue */
+        .wm-showcase__copy {
+          margin: 12px 0 0;
+          max-width: 420px;
+          font-size: 14px;
+          line-height: 1.8;
+          color: rgba(250, 244, 237, 0.78);
+        }
+        .wm-showcase__cta {
+          margin-top: 20px;
+        }
+        .wm-showcase__stamp {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 1;
+          min-width: 108px;
+          padding: 12px 14px;
+          border-radius: 24px;
+          background: rgba(16, 11, 8, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          text-align: center;
+          backdrop-filter: blur(12px);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-showcase__stamp small {
+          display: block;
+          font-size: 9px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--wm-text-faint);
+        }
+        .wm-showcase__stamp strong {
+          display: block;
+          margin-top: 4px;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 28px;
+          font-weight: 700;
+          color: white;
+          line-height: 1;
+        }
+        .wm-showcase__grid {
+          display: grid;
+          gap: 14px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .wm-showcase__mini {
+          position: relative;
+          overflow: hidden;
+          min-height: 180px;
+          border-radius: 26px;
+          border: 1px solid var(--wm-border);
+          background: rgba(255, 255, 255, 0.05);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-showcase__mini img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .wm-showcase__mini::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(12, 8, 6, 0.1) 0%, rgba(12, 8, 6, 0.7) 100%);
+        }
+        .wm-showcase__mini-copy {
+          position: absolute;
+          inset: auto 16px 16px;
+          z-index: 1;
+        }
+        .wm-showcase__mini-tag {
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #ffe1aa;
+        }
+        .wm-showcase__mini-name {
+          margin-top: 6px;
+          font-size: 15px;
+          font-weight: 700;
+          color: white;
+          line-height: 1.3;
+        }
+        .wm-showcase__mini-price {
+          margin-top: 5px;
+          font-size: 12px;
+          color: rgba(250, 244, 237, 0.74);
+        }
         .wm-scroll-cue {
-          position: absolute; bottom: 36px; left: 50%;
+          position: absolute;
+          left: 50%;
+          bottom: 28px;
           transform: translateX(-50%);
-          z-index: 5; display: flex; flex-direction: column;
-          align-items: center; gap: 10px;
-          font-size: 8.5px; letter-spacing: 0.26em;
-          text-transform: uppercase; color: var(--text-faint);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          z-index: 2;
+          color: var(--wm-text-faint);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
         }
         .wm-scroll-cue__track {
-          width: 1px; height: 52px;
-          background: var(--border); position: relative; overflow: hidden;
+          width: 1px;
+          height: 54px;
+          background: rgba(255, 255, 255, 0.12);
+          position: relative;
+          overflow: hidden;
         }
         .wm-scroll-cue__track::after {
-          content: ''; position: absolute; top: -100%; left: 0;
-          width: 100%; height: 100%;
-          background: linear-gradient(to bottom, transparent, var(--amber), transparent);
-          animation: scrollDrop 2.2s ease-in-out infinite;
+          content: "";
+          position: absolute;
+          top: -100%;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(180deg, transparent, #ffcf80, transparent);
+          animation: wm-scroll-drop 2.15s ease-in-out infinite;
         }
-        @keyframes scrollDrop {
-          0%   { top: -100%; opacity: 0; }
-          20%  { opacity: 1; }
-          80%  { opacity: 0.6; }
-          100% { top: 100%; opacity: 0; }
+        @keyframes wm-scroll-drop {
+          0% {
+            top: -100%;
+            opacity: 0;
+          }
+          20% {
+            opacity: 1;
+          }
+          100% {
+            top: 100%;
+            opacity: 0;
+          }
         }
-
-        /* ════════════════════════════════════════
-           MARQUEE TICKER
-        ════════════════════════════════════════ */
-        .wm-ticker {
-          background: var(--amber);
-          overflow: hidden;
-          padding: 14px 0;
+        .wm-marquee {
           position: relative;
-          border-top: 1px solid rgba(255,255,255,0.08);
+          overflow: hidden;
+          padding: 16px 0;
+          background: linear-gradient(90deg, #f3b154 0%, #eb7126 36%, #c95a12 100%);
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .wm-ticker::before, .wm-ticker::after {
-          content: ''; position: absolute; top: 0; bottom: 0; width: 80px;
-          z-index: 2; pointer-events: none;
+        .wm-marquee::before,
+        .wm-marquee::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 70px;
+          pointer-events: none;
+          z-index: 1;
         }
-        .wm-ticker::before { left: 0;  background: linear-gradient(to right,  var(--amber), transparent); }
-        .wm-ticker::after  { right: 0; background: linear-gradient(to left, var(--amber), transparent); }
-        .wm-ticker__track {
-          display: flex; gap: 0;
-          animation: tickerScroll 28s linear infinite;
+        .wm-marquee::before {
+          left: 0;
+          background: linear-gradient(90deg, rgba(235, 113, 38, 1), rgba(235, 113, 38, 0));
+        }
+        .wm-marquee::after {
+          right: 0;
+          background: linear-gradient(270deg, rgba(201, 90, 18, 1), rgba(201, 90, 18, 0));
+        }
+        .wm-marquee__track {
+          display: flex;
           width: max-content;
+          animation: wm-marquee-scroll 28s linear infinite;
         }
-        @keyframes tickerScroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+        .wm-marquee__item {
+          display: inline-flex;
+          align-items: center;
+          gap: 18px;
+          padding: 0 28px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.95);
+          white-space: nowrap;
         }
-        .wm-ticker__item {
-          display: flex; align-items: center; gap: 18px;
-          padding: 0 32px;
-          font-size: 11px; font-weight: 600;
-          letter-spacing: 0.18em; text-transform: uppercase;
-          color: rgba(255,255,255,0.92); white-space: nowrap;
+        .wm-marquee__dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.58);
           flex-shrink: 0;
         }
-        .wm-ticker__item span {
-          display: inline-block; width: 4px; height: 4px;
-          border-radius: 50%; background: rgba(255,255,255,0.5); flex-shrink: 0;
+        @keyframes wm-marquee-scroll {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
         }
-
-        /* ════════════════════════════════════════
-           STATS BAR
-        ════════════════════════════════════════ */
-        .wm-stats-bar {
-          background: var(--ink-1);
-          border-bottom: 1px solid var(--border);
+        .wm-stats {
+          padding: 34px 0 0;
         }
-        .wm-stats-bar__inner {
-          max-width: 1360px; margin: 0 auto;
-          padding: 0 72px;
-          display: grid; grid-template-columns: repeat(4,1fr);
+        .wm-stats__panel {
+          display: grid;
+          gap: 1px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          overflow: hidden;
+          border-radius: 32px;
+          border: 1px solid var(--wm-border-soft);
+          background: rgba(255, 255, 255, 0.07);
+          box-shadow: var(--wm-shadow-lg);
         }
-        @media(max-width:767px){
-          .wm-stats-bar__inner { grid-template-columns: repeat(2,1fr); padding: 0 32px; }
+        .wm-stat {
+          position: relative;
+          padding: 30px 24px;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%),
+            rgba(19, 13, 9, 0.92);
+          overflow: hidden;
         }
-
-        .wm-stat-item {
-          padding: 36px 28px; text-align: center;
-          border-right: 1px solid var(--border);
-          position: relative; overflow: hidden;
-          transition: background 0.3s;
+        .wm-stat::after {
+          content: "";
+          position: absolute;
+          left: 24px;
+          right: 24px;
+          bottom: 0;
+          height: 2px;
+          transform: scaleX(0);
+          transform-origin: left center;
+          transition: transform 0.28s ease;
+          background: linear-gradient(90deg, #ffcf80, #eb7126);
         }
-        .wm-stat-item::before {
-          content: '';
-          position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-          width: 0; height: 2px;
-          background: var(--amber);
-          transition: width 0.45s cubic-bezier(0.22,1,0.36,1);
+        .wm-stat:hover::after {
+          transform: scaleX(1);
         }
-        .wm-stat-item:hover::before { width: 60%; }
-        .wm-stat-item:last-child  { border-right: none; }
-        .wm-stat-item:hover { background: var(--ink-2); }
-        @media(max-width:767px){ .wm-stat-item:nth-child(2) { border-right: none; } }
-
-        .wm-stat-item__num {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 48px; font-weight: 700;
-          color: var(--text-primary); line-height: 1;
-          letter-spacing: -0.02em;
+        .wm-stat__value {
+          font-family: "Fraunces", Georgia, serif;
+          font-size: clamp(36px, 4vw, 52px);
+          font-weight: 700;
+          color: white;
+          line-height: 1;
         }
-        .wm-stat-item__label {
-          font-size: 9.5px; font-weight: 500; color: var(--text-muted);
-          margin-top: 7px; letter-spacing: 0.18em; text-transform: uppercase;
+        .wm-stat__label {
+          margin-top: 10px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--wm-text-faint);
         }
-        .wm-stat-item__accent {
-          display: block; width: 18px; height: 1.5px;
-          background: var(--amber); margin: 10px auto 0; opacity: 0.7;
+        .wm-values,
+        .wm-locations,
+        .wm-featured,
+        .wm-story,
+        .wm-testimonials,
+        .wm-faq,
+        .wm-cta {
+          padding: 110px 0;
         }
-        @media(max-width:767px){ .wm-stat-item__num { font-size: 38px; } }
-
-        /* ════════════════════════════════════════
-           VALUES
-        ════════════════════════════════════════ */
-        .wm-values { padding: 120px 0; position: relative; overflow: hidden; }
-
-        /* background geometric accent */
-        .wm-values__bg {
-          position: absolute; top: -120px; right: -80px;
-          width: 480px; height: 480px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(200,89,10,0.05) 0%, transparent 65%);
+        .wm-values {
+          position: relative;
+        }
+        .wm-values::before {
+          content: "";
+          position: absolute;
+          inset: 90px auto auto -120px;
+          width: 340px;
+          height: 340px;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(235, 113, 38, 0.09), transparent 70%);
+          filter: blur(24px);
           pointer-events: none;
         }
-
-        .wm-values__header { text-align: center; position: relative; }
         .wm-values__grid {
           display: grid;
-          grid-template-columns: repeat(2,1fr);
-          gap: 1px;
-          margin-top: 64px;
-          background: var(--border);
-          border: 1px solid var(--border);
-          border-radius: var(--r-2xl);
-          overflow: hidden;
+          gap: 18px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          margin-top: 56px;
         }
-        @media(min-width:1024px){ .wm-values__grid { grid-template-columns: repeat(4,1fr); } }
-
-        .wm-value {
-          padding: 48px 36px; background: var(--ink-1);
-          position: relative; overflow: hidden;
-          transition: background 0.4s;
-        }
-        .wm-value::before {
-          content: '';
-          position: absolute; inset: 0;
-          background: radial-gradient(ellipse at 0% 0%, rgba(200,89,10,0.10) 0%, transparent 60%);
-          opacity: 0; transition: opacity 0.5s;
-        }
-        .wm-value::after {
-          content: '';
-          position: absolute; left: 0; bottom: 0; right: 0; height: 2px;
-          background: linear-gradient(90deg, var(--amber) 0%, transparent 100%);
-          transform: scaleX(0); transform-origin: left;
-          transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
-        }
-        .wm-value:hover { background: var(--ink-2); }
-        .wm-value:hover::before { opacity: 1; }
-        .wm-value:hover::after  { transform: scaleX(1); }
-
-        .wm-value__index {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 72px; font-weight: 300; font-style: italic;
-          color: rgba(200,89,10,0.07);
-          line-height: 1;
-          position: absolute; top: 16px; right: 20px;
-          transition: color 0.4s;
-          letter-spacing: -0.03em;
-        }
-        .wm-value:hover .wm-value__index { color: rgba(200,89,10,0.13); }
-
-        .wm-value__icon-wrap {
-          width: 56px; height: 56px; border-radius: 15px;
-          background: var(--amber-pale);
-          border: 1px solid var(--amber-border);
-          color: var(--amber);
-          display: flex; align-items: center; justify-content: center;
-          transition: background 0.35s, transform 0.5s cubic-bezier(.34,1.56,.64,1), box-shadow 0.35s, border-color 0.35s;
-        }
-        .wm-value:hover .wm-value__icon-wrap {
-          background: var(--amber); color: #fff;
-          transform: scale(1.1) rotate(-9deg);
-          box-shadow: var(--shadow-amber);
-          border-color: transparent;
-        }
-        .wm-value__icon-wrap svg { width: 22px; height: 22px; }
-
-        .wm-value__title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 26px; font-weight: 700;
-          color: var(--text-primary); margin-top: 24px; line-height: 1.15;
-        }
-        .wm-value__desc {
-          font-size: 13px; color: var(--text-muted); margin-top: 10px;
-          line-height: 1.78; font-weight: 300;
-        }
-
-        @media(max-width:479px){
-          .wm-values { padding: 80px 0; }
-          .wm-values__grid { grid-template-columns: 1fr; }
-          .wm-value { padding: 36px 26px; }
-        }
-
-        /* ════════════════════════════════════════
-           LOCATIONS
-        ════════════════════════════════════════ */
-        .wm-locations { padding: 120px 0; background: var(--ink-1); position: relative; }
-        .wm-locations__grid {
-          display: grid; grid-template-columns: 1fr;
-          gap: 20px; margin-top: 64px;
-        }
-        @media(min-width:768px){ .wm-locations__grid { grid-template-columns: repeat(3,1fr); } }
-
-        .wm-loc-card {
-          position: relative; border-radius: var(--r-xl); overflow: hidden;
-          border: 1px solid var(--border); background: var(--ink-2);
-          padding: 40px 34px; text-decoration: none;
-          display: flex; flex-direction: column; min-height: 340px;
-          transition: border-color 0.4s, box-shadow 0.45s, transform 0.4s;
-        }
-        .wm-loc-card:hover {
-          border-color: var(--amber-border);
-          box-shadow: var(--shadow-lg), 0 0 0 1px rgba(200,89,10,0.08);
-          transform: translateY(-5px);
-        }
-
-        /* glow gradient on hover */
-        .wm-loc-card__glow {
-          position: absolute; inset: 0;
-          background: linear-gradient(135deg, rgba(200,89,10,0.08) 0%, transparent 55%);
-          opacity: 0; transition: opacity 0.45s; pointer-events: none;
-        }
-        .wm-loc-card:hover .wm-loc-card__glow { opacity: 1; }
-
-        /* decorative corner */
-        .wm-loc-card__corner {
-          position: absolute; top: 0; right: 0;
-          width: 80px; height: 80px; pointer-events: none;
-          overflow: hidden;
-        }
-        .wm-loc-card__corner::before {
-          content: '';
-          position: absolute; top: -1px; right: -1px;
-          width: 80px; height: 80px;
-          background: linear-gradient(225deg, rgba(200,89,10,0.12) 0%, transparent 60%);
-          border-bottom-left-radius: 80px;
-          opacity: 0; transition: opacity 0.45s;
-        }
-        .wm-loc-card:hover .wm-loc-card__corner::before { opacity: 1; }
-
-        .wm-loc-card__num {
-          font-size: 10px; font-weight: 500;
-          letter-spacing: 0.24em; color: var(--text-faint);
-          text-transform: uppercase; position: relative;
-        }
-        .wm-loc-card__name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 36px; font-weight: 700;
-          color: var(--text-primary); margin-top: 16px;
-          line-height: 1.0; position: relative;
-        }
-        .wm-loc-card__tagline {
-          font-size: 13px; color: var(--text-muted); margin-top: 12px;
-          line-height: 1.7; font-weight: 300; position: relative;
-        }
-        .wm-loc-card__sep {
-          width: 28px; height: 1.5px;
-          background: linear-gradient(90deg, var(--amber), transparent);
-          margin: 20px 0; position: relative;
-          transition: width 0.4s cubic-bezier(0.22,1,0.36,1);
-        }
-        .wm-loc-card:hover .wm-loc-card__sep { width: 48px; }
-        .wm-loc-card__specialty {
-          font-size: 9px; font-weight: 700; letter-spacing: 0.22em;
-          text-transform: uppercase; color: var(--amber);
-          margin-top: auto; position: relative;
-        }
-        .wm-loc-card__footer {
-          display: flex; align-items: center;
-          justify-content: space-between; margin-top: 20px;
-          padding-top: 18px; border-top: 1px solid var(--border);
+        .wm-value-card {
           position: relative;
-        }
-        .wm-loc-card__cta {
-          display: inline-flex; align-items: center; gap: 8px;
-          font-size: 11px; font-weight: 600; color: var(--amber);
-          letter-spacing: 0.08em; text-transform: uppercase;
-          transition: gap 0.3s;
-        }
-        .wm-loc-card:hover .wm-loc-card__cta { gap: 14px; }
-        .wm-loc-card__cta svg { width: 12px; height: 12px; }
-        .wm-loc-card__phone {
-          font-size: 10.5px; color: var(--text-faint);
-          text-decoration: none;
-          display: flex; align-items: center; gap: 5px;
-          transition: color 0.25s;
-        }
-        .wm-loc-card__phone:hover { color: var(--text-secondary); }
-        .wm-loc-card__phone svg  { width: 10px; height: 10px; }
-
-        @media(max-width:479px){
-          .wm-locations { padding: 80px 0; }
-          .wm-loc-card  { padding: 28px 24px; min-height: 300px; }
-          .wm-loc-card__name { font-size: 30px; }
-        }
-
-        /* ════════════════════════════════════════
-           FEATURED
-        ════════════════════════════════════════ */
-        .wm-featured { padding: 120px 0; position: relative; }
-
-        .wm-featured__header {
-          display: flex; align-items: flex-end;
-          justify-content: space-between; gap: 24px;
-        }
-
-        .wm-featured__grid {
-          display: grid; grid-template-columns: repeat(2,1fr);
-          gap: 20px; margin-top: 56px;
-        }
-        @media(min-width:1024px){ .wm-featured__grid { grid-template-columns: repeat(4,1fr); } }
-
-        .wm-feat-card {
-          border-radius: var(--r-lg); overflow: hidden;
-          border: 1px solid var(--border); background: var(--ink-1);
-          transition: border-color 0.35s, box-shadow 0.4s, transform 0.35s;
-        }
-        .wm-feat-card:hover {
-          border-color: var(--amber-border);
-          box-shadow: var(--shadow-lg);
-          transform: translateY(-4px);
-        }
-
-        .wm-feat-card__img { position: relative; aspect-ratio: 3/2; overflow: hidden; }
-        .wm-feat-card__img img {
-          width: 100%; height: 100%; object-fit: cover; display: block;
-          transition: transform 0.9s cubic-bezier(0.16,1,0.3,1);
-        }
-        .wm-feat-card:hover .wm-feat-card__img img { transform: scale(1.1); }
-
-        .wm-feat-card__badge {
-          position: absolute; top: 12px; right: 12px;
-          width: 42px; height: 42px; border-radius: 11px;
-          background: rgba(200,89,10,0.88); backdrop-filter: blur(8px);
-          display: flex; align-items: center; justify-content: center; color: #fff;
-          border: 1px solid rgba(255,255,255,0.12);
-          transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s;
-        }
-        .wm-feat-card:hover .wm-feat-card__badge {
-          transform: scale(1.12) rotate(-10deg);
-          box-shadow: var(--shadow-amber);
-        }
-        .wm-feat-card__badge svg { width: 17px; height: 17px; }
-
-        .wm-feat-card__img-scrim {
-          position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(7,6,5,0.7) 0%, transparent 55%);
-          opacity: 0; transition: opacity 0.35s;
-        }
-        .wm-feat-card:hover .wm-feat-card__img-scrim { opacity: 1; }
-
-        .wm-feat-card__body { padding: 20px 22px 22px; }
-        .wm-feat-card__tag  {
-          font-size: 8.5px; font-weight: 700; letter-spacing: 0.22em;
-          text-transform: uppercase; color: var(--amber); margin-bottom: 7px;
-        }
-        .wm-feat-card__name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 20px; font-weight: 700;
-          color: var(--text-primary); line-height: 1.2;
-        }
-        .wm-feat-card__price {
-          font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: 300;
-        }
-        .wm-feat-card__action {
-          display: flex; align-items: center; gap: 6px;
-          font-size: 10.5px; font-weight: 600; color: var(--amber);
-          letter-spacing: 0.08em; text-transform: uppercase;
-          margin-top: 14px; padding-top: 14px;
-          border-top: 1px solid var(--border);
-          opacity: 0; transform: translateY(4px);
-          transition: opacity 0.3s, transform 0.3s;
-        }
-        .wm-feat-card__action svg { width: 11px; height: 11px; }
-        .wm-feat-card:hover .wm-feat-card__action { opacity: 1; transform: translateY(0); }
-
-        @media(max-width:479px){
-          .wm-featured { padding: 80px 0; }
-          .wm-featured__grid { grid-template-columns: 1fr; gap: 16px; }
-          .wm-featured__header { flex-direction: column; align-items: flex-start; }
-        }
-
-        /* ════════════════════════════════════════
-           STORY
-        ════════════════════════════════════════ */
-        .wm-story { padding: 120px 0; background: var(--ink-1); position: relative; overflow: hidden; }
-
-        /* decorative grid lines */
-        .wm-story__grid-deco {
-          position: absolute; inset: 0; pointer-events: none; opacity: 0.025;
-          background-image:
-            linear-gradient(var(--off-white) 1px, transparent 1px),
-            linear-gradient(90deg, var(--off-white) 1px, transparent 1px);
-          background-size: 80px 80px;
-        }
-
-        .wm-story__inner {
-          display: grid; grid-template-columns: 1fr; gap: 72px; align-items: center;
-          position: relative;
-        }
-        @media(min-width:1024px){ .wm-story__inner { grid-template-columns: 1fr 1fr; } }
-
-        .wm-story__text {
-          font-size: 15px; color: var(--text-secondary); line-height: 1.9;
-          margin-top: 20px; font-weight: 300;
-        }
-        .wm-story__lead {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 19px; font-weight: 400; font-style: italic;
-          color: var(--text-secondary); line-height: 1.65;
-          margin-top: 16px;
-          padding-left: 18px;
-          border-left: 2px solid var(--amber);
-        }
-        .wm-story__link {
-          display: inline-flex; align-items: center; gap: 10px;
-          font-size: 11px; font-weight: 700; color: var(--amber);
-          text-decoration: none; margin-top: 36px;
-          letter-spacing: 0.12em; text-transform: uppercase;
-          transition: gap 0.3s;
-        }
-        .wm-story__link:hover { gap: 20px; }
-        .wm-story__link svg { width: 13px; height: 13px; }
-
-        /* image frame */
-        .wm-story__frame {
-          position: relative;
-        }
-        .wm-story__frame-deco {
-          position: absolute;
-          top: -20px; right: -20px;
-          width: 100%; height: 100%;
-          border: 1px solid var(--border-mid);
-          border-radius: var(--r-xl);
-          pointer-events: none; z-index: 0;
-        }
-        .wm-story__img-wrap {
-          position: relative; border-radius: var(--r-xl); overflow: hidden;
-          aspect-ratio: 5/4; border: 1px solid var(--border-mid);
-          z-index: 1;
-          transition: box-shadow 0.5s;
-        }
-        .wm-story__img-wrap:hover { box-shadow: var(--shadow-xl); }
-        .wm-story__img-wrap img {
-          width: 100%; height: 100%; object-fit: cover; display: block;
-          transition: transform 1s cubic-bezier(0.16,1,0.3,1);
-        }
-        .wm-story__img-wrap:hover img { transform: scale(1.04); }
-        .wm-story__img-caption {
-          position: absolute; bottom: 0; left: 0; right: 0;
-          padding: 40px 28px 26px;
-          background: linear-gradient(to top, rgba(7,6,5,0.95) 0%, rgba(7,6,5,0.5) 60%, transparent 100%);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 18px; font-weight: 400; font-style: italic;
-          color: var(--text-secondary); line-height: 1.5;
-        }
-
-        /* floating year badge */
-        .wm-story__year-badge {
-          position: absolute; bottom: -18px; right: 28px; z-index: 2;
-          padding: 12px 22px;
-          background: var(--amber); color: #fff;
-          border-radius: var(--r-sm);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 28px; font-weight: 700; line-height: 1;
-          box-shadow: var(--shadow-amber);
-        }
-        .wm-story__year-badge small {
-          display: block; font-family: 'DM Sans', sans-serif;
-          font-size: 9px; font-weight: 600; letter-spacing: 0.18em;
-          text-transform: uppercase; opacity: 0.85; margin-bottom: 2px;
-        }
-
-        @media(max-width:479px){
-          .wm-story { padding: 80px 0; }
-          .wm-story__inner { gap: 48px; }
-          .wm-story__frame-deco { display: none; }
-        }
-
-        /* ════════════════════════════════════════
-           TESTIMONIALS
-        ════════════════════════════════════════ */
-        .wm-testimonials { padding: 120px 0; }
-        .wm-testimonials__grid {
-          display: grid; grid-template-columns: 1fr;
-          gap: 20px; margin-top: 64px;
-        }
-        @media(min-width:768px){ .wm-testimonials__grid { grid-template-columns: repeat(3,1fr); } }
-
-        .wm-review {
-          padding: 36px 30px; border-radius: var(--r-lg);
-          background: var(--ink-1); border: 1px solid var(--border);
-          position: relative; overflow: hidden;
-          transition: border-color 0.35s, box-shadow 0.4s, transform 0.35s;
-          display: flex; flex-direction: column;
-        }
-        .wm-review:hover {
-          border-color: var(--amber-border);
-          box-shadow: var(--shadow-md), 0 0 0 1px rgba(200,89,10,0.07);
-          transform: translateY(-4px);
-        }
-
-        /* large quote mark */
-        .wm-review__bg-quote {
-          position: absolute; top: -8px; right: 16px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 120px; font-weight: 900;
-          color: rgba(200,89,10,0.055); line-height: 1;
-          pointer-events: none; user-select: none;
-          letter-spacing: -0.05em;
-        }
-
-        .wm-review__stars { display: flex; gap: 3px; color: var(--gold); }
-        .wm-review__stars svg { width: 13px; height: 13px; fill: currentColor; }
-
-        .wm-review__quote {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 18px; font-weight: 600; font-style: italic;
-          color: rgba(240,235,228,0.88); margin-top: 16px;
-          line-height: 1.55; flex: 1; position: relative;
-        }
-
-        .wm-review__sep {
-          width: 20px; height: 1.5px;
-          background: var(--amber); margin: 18px 0; opacity: 0.65;
-        }
-        .wm-review__author {
-          font-size: 10.5px; color: var(--text-muted);
-          font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-        }
-        .wm-review__location {
-          font-size: 9.5px; color: var(--text-faint); letter-spacing: 0.12em;
-          text-transform: uppercase; margin-top: 3px; font-weight: 400;
-        }
-
-        @media(max-width:479px){
-          .wm-testimonials { padding: 80px 0; }
-          .wm-review { padding: 26px 22px; }
-        }
-
-        /* ════════════════════════════════════════
-           FAQ
-        ════════════════════════════════════════ */
-        .wm-faq { padding: 120px 0; background: var(--ink-1); position: relative; }
-        .wm-faq__cols {
-          display: grid; grid-template-columns: 1fr;
-          gap: 0; margin-top: 64px;
-        }
-        @media(min-width:768px){ .wm-faq__cols { grid-template-columns: 1fr 1fr; gap: 0 64px; } }
-
-        .wm-faq-item { border-bottom: 1px solid var(--border); }
-        .wm-faq-btn {
-          width: 100%; background: none; border: none; cursor: pointer;
-          padding: 22px 0; display: flex; align-items: center;
-          justify-content: space-between; gap: 18px; text-align: left;
-        }
-        .wm-faq-btn--open .wm-faq-q { color: var(--text-primary); }
-        .wm-faq-q {
-          font-size: 14px; font-weight: 400; color: var(--text-secondary);
-          line-height: 1.55; transition: color 0.22s; font-family: 'DM Sans', sans-serif;
-        }
-        .wm-faq-icon {
-          flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
-          background: var(--amber-pale); color: var(--amber);
-          display: flex; align-items: center; justify-content: center;
-          border: 1px solid var(--amber-border);
-        }
-        .wm-faq-a-inner {
-          padding: 0 0 20px;
-          font-size: 13.5px; color: var(--text-muted);
-          line-height: 1.82; font-weight: 300;
-        }
-
-        @media(max-width:479px){
-          .wm-faq { padding: 80px 0; }
-          .wm-faq-q { font-size: 13px; }
-        }
-
-        /* ════════════════════════════════════════
-           CTA BANNER
-        ════════════════════════════════════════ */
-        .wm-cta-section { padding: 48px 0 128px; }
-
-        .wm-cta-box {
-          border-radius: var(--r-2xl); overflow: hidden;
-          background: var(--amber);
-          padding: 80px 64px;
-          display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center;
-          position: relative;
-        }
-        @media(min-width:768px){
-          .wm-cta-box { grid-template-columns: 1fr auto; padding: 80px 80px; gap: 56px; }
-        }
-
-        /* layered bg treatments */
-        .wm-cta-box::before {
-          content: '';
-          position: absolute; inset: 0;
+          padding: 30px 28px;
+          min-height: 260px;
+          border-radius: 28px;
+          border: 1px solid var(--wm-border);
           background:
-            radial-gradient(ellipse 60% 80% at 15% 50%, rgba(255,255,255,0.09) 0%, transparent 60%),
-            radial-gradient(ellipse 40% 60% at 85% 20%, rgba(0,0,0,0.10) 0%, transparent 55%);
+            linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+            rgba(23, 16, 12, 0.9);
+          overflow: hidden;
+          transition: transform 0.26s ease, border-color 0.26s ease, box-shadow 0.26s ease;
+          box-shadow: var(--wm-shadow-lg);
         }
-        /* subtle cross-hatch */
-        .wm-cta-box__pattern {
-          position: absolute; inset: 0; opacity: 0.04;
-          background-image: repeating-linear-gradient(
-            45deg,
-            #000 0, #000 1px, transparent 0, transparent 50%
-          );
-          background-size: 12px 12px;
+        .wm-value-card:hover {
+          transform: translateY(-4px);
+          border-color: var(--wm-amber-border);
+          box-shadow: 0 28px 68px rgba(0, 0, 0, 0.4);
         }
-        /* top-right circle decoration */
-        .wm-cta-box__circle {
-          position: absolute; top: -60px; right: -60px;
-          width: 280px; height: 280px; border-radius: 50%;
-          border: 1px solid rgba(255,255,255,0.12);
+        .wm-value-card__number {
+          position: absolute;
+          top: 18px;
+          right: 20px;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 64px;
+          font-weight: 300;
+          color: rgba(255, 207, 128, 0.08);
+          line-height: 1;
+        }
+        .wm-value-card__icon {
+          width: 56px;
+          height: 56px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 18px;
+          color: #ffd08d;
+          background: rgba(235, 113, 38, 0.12);
+          border: 1px solid rgba(235, 113, 38, 0.24);
+        }
+        .wm-value-card__icon svg {
+          width: 22px;
+          height: 22px;
+        }
+        .wm-value-card__title {
+          margin: 22px 0 0;
+          font-size: 28px;
+          line-height: 1.1;
+        }
+        .wm-value-card__copy {
+          margin-top: 12px;
+          font-size: 14px;
+          line-height: 1.75;
+          color: var(--wm-text-soft);
+        }
+        .wm-locations {
+          background:
+            radial-gradient(circle at 90% 10%, rgba(235, 113, 38, 0.12), transparent 18%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.01) 100%);
+        }
+        .wm-locations__grid {
+          display: grid;
+          gap: 20px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          margin-top: 56px;
+        }
+        .wm-location-card {
+          position: relative;
+          padding: 30px;
+          min-height: 320px;
+          display: flex;
+          flex-direction: column;
+          border-radius: 30px;
+          border: 1px solid var(--wm-border);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.015) 100%),
+            rgba(18, 13, 9, 0.86);
+          overflow: hidden;
+          box-shadow: var(--wm-shadow-lg);
+          transition: transform 0.26s ease, border-color 0.26s ease, box-shadow 0.26s ease;
+        }
+        .wm-location-card:hover {
+          transform: translateY(-4px);
+          border-color: var(--wm-amber-border);
+          box-shadow: 0 28px 76px rgba(0, 0, 0, 0.42);
+        }
+        .wm-location-card__glow {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at top right, rgba(235, 113, 38, 0.14), transparent 42%);
+          opacity: 0;
+          transition: opacity 0.26s ease;
           pointer-events: none;
         }
-        .wm-cta-box__circle::after {
-          content: '';
-          position: absolute; inset: 24px;
-          border-radius: 50%; border: 1px solid rgba(255,255,255,0.08);
+        .wm-location-card:hover .wm-location-card__glow {
+          opacity: 1;
         }
-
-        .wm-cta-box__title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(38px, 4.5vw, 62px); font-weight: 900; color: #fff;
-          line-height: 1.0; position: relative; z-index: 1;
-          letter-spacing: -0.01em;
+        .wm-location-card__head {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
         }
-        .wm-cta-box__sub {
-          font-size: 15px; color: rgba(255,255,255,0.78); margin-top: 14px;
-          position: relative; z-index: 1; max-width: 400px;
-          font-weight: 300; line-height: 1.75;
+        .wm-location-card__kicker,
+        .wm-location-card__specialty {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
         }
-        .wm-cta-box__btns {
-          display: flex; flex-wrap: wrap; gap: 12px;
-          position: relative; z-index: 1;
+        .wm-location-card__kicker {
+          color: var(--wm-text-faint);
         }
-
-        /* ── buttons ── */
-        .wm-btn-primary {
-          display: inline-flex; align-items: center; gap: 10px;
-          padding: 16px 36px; background: var(--amber); color: #fff;
-          font-size: 12px; font-weight: 600; border-radius: var(--r-sm);
-          text-decoration: none; border: none; cursor: pointer;
-          transition: background 0.28s, transform 0.28s, box-shadow 0.28s;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          font-family: 'DM Sans', sans-serif;
-          position: relative; overflow: hidden;
+        .wm-location-card__specialty {
+          color: #ffcf80;
         }
-        .wm-btn-primary::before {
-          content: '';
-          position: absolute; inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 55%);
-          opacity: 0; transition: opacity 0.28s;
+        .wm-location-card__title {
+          margin: 24px 0 0;
+          font-size: 38px;
+          line-height: 1.02;
         }
-        .wm-btn-primary:hover {
-          background: #a84e08;
-          transform: translateY(-3px);
-          box-shadow: var(--shadow-amber-lg);
+        .wm-location-card__copy {
+          margin-top: 14px;
+          max-width: 28ch;
+          font-size: 14px;
+          line-height: 1.8;
+          color: var(--wm-text-soft);
         }
-        .wm-btn-primary:hover::before { opacity: 1; }
-
-        .wm-btn-outline {
-          display: inline-flex; align-items: center; gap: 10px;
-          padding: 16px 36px; background: transparent;
-          border: 1px solid var(--border-warm); color: var(--text-secondary);
-          font-size: 12px; font-weight: 500; border-radius: var(--r-sm);
-          text-decoration: none; cursor: pointer;
-          transition: border-color 0.28s, color 0.28s, background 0.28s, transform 0.28s;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          font-family: 'DM Sans', sans-serif;
+        .wm-location-card__rail {
+          margin-top: 24px;
+          width: 54px;
+          height: 2px;
+          background: linear-gradient(90deg, #ffcf80, #eb7126);
+          border-radius: 999px;
         }
-        .wm-btn-outline:hover {
-          border-color: var(--text-secondary); color: var(--text-primary);
-          background: var(--amber-pale); transform: translateY(-3px);
+        .wm-location-card__actions {
+          margin-top: auto;
+          padding-top: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          flex-wrap: wrap;
         }
-
-        .wm-btn-dark {
-          display: inline-flex; align-items: center; gap: 9px;
-          padding: 16px 32px; background: var(--ink); color: var(--off-white);
-          font-size: 12px; font-weight: 600; border-radius: var(--r-sm);
+        .wm-location-card__phone {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: var(--wm-text-soft);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
           text-decoration: none;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          font-family: 'DM Sans', sans-serif;
-          transition: background 0.28s, transform 0.28s, box-shadow 0.28s;
         }
-        .wm-btn-dark:hover { background: var(--ink-4); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-
-        .wm-btn-ghost {
-          display: inline-flex; align-items: center; gap: 9px;
-          padding: 16px 32px; background: rgba(255,255,255,0.13); color: #fff;
-          font-size: 12px; font-weight: 600; border-radius: var(--r-sm);
-          text-decoration: none; border: 1.5px solid rgba(255,255,255,0.32);
-          letter-spacing: 0.08em; text-transform: uppercase;
-          font-family: 'DM Sans', sans-serif;
-          transition: background 0.28s, transform 0.28s;
+        .wm-location-card__phone:hover {
+          color: white;
         }
-        .wm-btn-ghost:hover { background: rgba(255,255,255,0.24); transform: translateY(-3px); }
-
-        .wm-text-link {
-          display: inline-flex; align-items: center; gap: 8px;
-          font-size: 11px; font-weight: 700; color: var(--amber);
-          text-decoration: none;
-          letter-spacing: 0.1em; text-transform: uppercase;
-          transition: gap 0.3s;
+        .wm-featured__top {
+          display: flex;
+          align-items: end;
+          justify-content: space-between;
+          gap: 24px;
+          flex-wrap: wrap;
         }
-        .wm-text-link:hover { gap: 16px; }
-        .wm-text-link svg { width: 12px; height: 12px; }
-
-        @media(max-width:479px){
-          .wm-cta-section { padding: 40px 0 88px; }
-          .wm-cta-box { padding: 44px 28px; border-radius: var(--r-xl); gap: 32px; }
-          .wm-cta-box__btns { flex-direction: column; }
-          .wm-btn-dark, .wm-btn-ghost { justify-content: center; }
+        .wm-featured__grid {
+          display: grid;
+          gap: 18px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          margin-top: 56px;
         }
-
-        @media(hover:none){
-          .wm-btn-primary:hover, .wm-btn-outline:hover,
-          .wm-btn-dark:hover, .wm-btn-ghost:hover,
-          .wm-loc-card:hover, .wm-review:hover,
-          .wm-feat-card:hover { transform: none; }
+        .wm-feature-card {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          border-radius: 28px;
+          border: 1px solid var(--wm-border);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+            rgba(19, 13, 9, 0.9);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-feature-card__media {
+          position: relative;
+          aspect-ratio: 4 / 3;
+          overflow: hidden;
+        }
+        .wm-feature-card__media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .wm-feature-card:hover .wm-feature-card__media img {
+          transform: scale(1.08);
+        }
+        .wm-feature-card__scrim {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(12, 8, 6, 0.08) 0%, rgba(12, 8, 6, 0.75) 100%);
+        }
+        .wm-feature-card__badge {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          z-index: 1;
+          width: 46px;
+          height: 46px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 16px;
+          background: rgba(235, 113, 38, 0.88);
+          color: white;
+          box-shadow: var(--wm-shadow-amber);
+        }
+        .wm-feature-card__body {
+          display: flex;
+          flex: 1;
+          flex-direction: column;
+          padding: 22px 22px 24px;
+        }
+        .wm-feature-card__eyebrow-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .wm-feature-card__tag,
+        .wm-feature-card__index {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+        .wm-feature-card__tag {
+          color: #ffcf80;
+        }
+        .wm-feature-card__index {
+          color: var(--wm-text-faint);
+        }
+        .wm-feature-card__title {
+          margin: 16px 0 0;
+          font-size: 28px;
+          line-height: 1.08;
+        }
+        .wm-feature-card__copy {
+          margin-top: 12px;
+          font-size: 14px;
+          line-height: 1.78;
+          color: var(--wm-text-soft);
+        }
+        .wm-feature-card__footer {
+          margin-top: auto;
+          padding-top: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          border-top: 1px solid var(--wm-border-soft);
+        }
+        .wm-feature-card__price {
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.62);
+        }
+        .wm-story {
+          position: relative;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.01) 100%);
+        }
+        .wm-story::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          opacity: 0.04;
+          pointer-events: none;
+          background-image:
+            linear-gradient(rgba(255, 255, 255, 0.8) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.8) 1px, transparent 1px);
+          background-size: 86px 86px;
+          mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%);
+        }
+        .wm-story__layout {
+          position: relative;
+          display: grid;
+          gap: 56px;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 0.96fr);
+          align-items: center;
+        }
+        .wm-story__lead {
+          margin: 22px 0 0;
+          padding-left: 18px;
+          border-left: 2px solid var(--wm-amber);
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 20px;
+          font-style: italic;
+          line-height: 1.7;
+          color: rgba(250, 244, 237, 0.86);
+        }
+        .wm-story__body {
+          margin-top: 18px;
+          font-size: 15px;
+          line-height: 1.85;
+          color: var(--wm-text-soft);
+        }
+        .wm-story__points {
+          display: grid;
+          gap: 12px;
+          margin-top: 24px;
+        }
+        .wm-story__point {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          color: var(--wm-text-soft);
+          font-size: 14px;
+          line-height: 1.65;
+        }
+        .wm-story__point svg {
+          width: 16px;
+          height: 16px;
+          color: #ffcf80;
+          margin-top: 3px;
+          flex-shrink: 0;
+        }
+        .wm-story__actions {
+          margin-top: 28px;
+        }
+        .wm-story__media {
+          position: relative;
+          min-height: 580px;
+        }
+        .wm-story__frame {
+          position: absolute;
+          inset: 0 0 70px 0;
+          overflow: hidden;
+          border-radius: 34px;
+          border: 1px solid var(--wm-border);
+          box-shadow: var(--wm-shadow-xl);
+        }
+        .wm-story__frame img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .wm-story__frame::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(12, 8, 6, 0.06) 0%, rgba(12, 8, 6, 0.7) 100%);
+        }
+        .wm-story__caption {
+          position: absolute;
+          left: 24px;
+          right: 24px;
+          bottom: 22px;
+          z-index: 1;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 20px;
+          font-style: italic;
+          color: rgba(250, 244, 237, 0.92);
+        }
+        .wm-story__mini {
+          position: absolute;
+          right: -16px;
+          bottom: 0;
+          width: min(260px, 42%);
+          overflow: hidden;
+          border-radius: 28px;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(18, 13, 9, 0.92);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-story__mini img {
+          aspect-ratio: 4 / 3;
+          width: 100%;
+          object-fit: cover;
+        }
+        .wm-story__mini-copy {
+          padding: 16px 18px 18px;
+        }
+        .wm-story__mini-eyebrow {
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #ffcf80;
+        }
+        .wm-story__mini-title {
+          margin-top: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 1.35;
+        }
+        .wm-story__floating-stat {
+          position: absolute;
+          left: -18px;
+          top: 28px;
+          padding: 18px 20px;
+          border-radius: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: rgba(18, 13, 9, 0.82);
+          backdrop-filter: blur(14px);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-story__floating-value {
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 40px;
+          font-weight: 700;
+          line-height: 1;
+          color: white;
+        }
+        .wm-story__floating-label {
+          margin-top: 8px;
+          max-width: 14ch;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--wm-text-faint);
+          line-height: 1.45;
+        }
+        .wm-testimonials__grid {
+          display: grid;
+          gap: 18px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          margin-top: 56px;
+        }
+        .wm-review-card {
+          position: relative;
+          min-height: 100%;
+          padding: 28px 26px 30px;
+          overflow: hidden;
+          border-radius: 28px;
+          border: 1px solid var(--wm-border);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+            rgba(19, 13, 9, 0.9);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-review-card__quote-mark {
+          position: absolute;
+          top: -12px;
+          right: 18px;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 118px;
+          color: rgba(255, 207, 128, 0.08);
+          line-height: 1;
+          pointer-events: none;
+        }
+        .wm-review-card__stars {
+          display: flex;
+          gap: 4px;
+          color: var(--wm-gold);
+        }
+        .wm-review-card__stars svg {
+          width: 14px;
+          height: 14px;
+          fill: currentColor;
+        }
+        .wm-review-card__quote {
+          position: relative;
+          margin: 18px 0 0;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 22px;
+          line-height: 1.55;
+          color: rgba(250, 244, 237, 0.92);
+        }
+        .wm-review-card__rail {
+          width: 38px;
+          height: 2px;
+          margin: 20px 0 16px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #ffcf80, #eb7126);
+        }
+        .wm-review-card__author {
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.84);
+        }
+        .wm-review-card__location {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--wm-text-faint);
+        }
+        .wm-faq {
+          background:
+            radial-gradient(circle at 84% 14%, rgba(235, 113, 38, 0.1), transparent 18%),
+            rgba(255, 255, 255, 0.015);
+        }
+        .wm-faq__cols {
+          display: grid;
+          gap: 24px 36px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          margin-top: 56px;
+        }
+        .wm-help-card {
+          margin-bottom: 18px;
+          padding: 22px 22px 24px;
+          border-radius: 26px;
+          border: 1px solid var(--wm-border);
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+            rgba(18, 13, 9, 0.86);
+          box-shadow: var(--wm-shadow-lg);
+        }
+        .wm-help-card__eyebrow {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #ffcf80;
+        }
+        .wm-help-card__title {
+          margin: 10px 0 0;
+          font-size: 26px;
+          line-height: 1.1;
+        }
+        .wm-help-card__copy {
+          margin-top: 12px;
+          font-size: 14px;
+          line-height: 1.75;
+          color: var(--wm-text-soft);
+        }
+        .wm-help-card__actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          margin-top: 18px;
+        }
+        .wm-faq-item {
+          border-bottom: 1px solid var(--wm-border-soft);
+        }
+        .wm-faq-button {
+          width: 100%;
+          padding: 22px 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          border: 0;
+          background: transparent;
+          color: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+        .wm-faq-question {
+          font-size: 15px;
+          line-height: 1.55;
+          color: var(--wm-text-soft);
+          transition: color 0.22s ease;
+        }
+        .wm-faq-button.is-open .wm-faq-question,
+        .wm-faq-button:hover .wm-faq-question {
+          color: white;
+        }
+        .wm-faq-icon {
+          width: 32px;
+          height: 32px;
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          color: #ffcf80;
+          border: 1px solid rgba(235, 113, 38, 0.24);
+        }
+        .wm-faq-icon svg {
+          width: 14px;
+          height: 14px;
+        }
+        .wm-faq-answer {
+          overflow: hidden;
+        }
+        .wm-faq-answer__inner {
+          padding: 0 0 20px;
+          font-size: 14px;
+          line-height: 1.8;
+          color: var(--wm-text-soft);
+        }
+        .wm-cta {
+          padding-top: 34px;
+        }
+        .wm-cta__panel {
+          position: relative;
+          overflow: hidden;
+          display: grid;
+          gap: 24px;
+          align-items: center;
+          grid-template-columns: minmax(0, 1fr) auto;
+          padding: 54px;
+          border-radius: 36px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background-size: cover;
+          background-position: center;
+          box-shadow: var(--wm-shadow-xl);
+        }
+        .wm-cta__panel::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(110deg, rgba(16, 11, 8, 0.92) 0%, rgba(16, 11, 8, 0.74) 48%, rgba(16, 11, 8, 0.54) 100%),
+            radial-gradient(circle at 18% 40%, rgba(235, 113, 38, 0.22), transparent 40%);
+        }
+        .wm-cta__panel > * {
+          position: relative;
+          z-index: 1;
+        }
+        .wm-cta__eyebrow {
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #ffcf80;
+        }
+        .wm-cta__title {
+          margin: 14px 0 0;
+          font-size: clamp(38px, 4.4vw, 64px);
+          line-height: 1;
+        }
+        .wm-cta__copy {
+          margin-top: 14px;
+          max-width: 560px;
+          font-size: 15px;
+          line-height: 1.8;
+          color: rgba(250, 244, 237, 0.78);
+        }
+        .wm-cta__actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 14px;
+        }
+        @media (min-width: 1040px) {
+          .wm-hero__inner {
+            grid-template-columns: minmax(0, 1.02fr) minmax(430px, 0.98fr);
+            padding-top: 150px;
+          }
+        }
+        @media (max-width: 1180px) {
+          .wm-values__grid,
+          .wm-featured__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .wm-locations__grid,
+          .wm-testimonials__grid,
+          .wm-story__layout {
+            grid-template-columns: 1fr;
+          }
+          .wm-story__media {
+            min-height: 540px;
+          }
+        }
+        @media (max-width: 960px) {
+          .wm-stats__panel,
+          .wm-hero__signals,
+          .wm-faq__cols {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .wm-cta__panel {
+            grid-template-columns: 1fr;
+          }
+          .wm-showcase__grid {
+            grid-template-columns: 1fr;
+          }
+          .wm-showcase__mini {
+            min-height: 150px;
+          }
+        }
+        @media (max-width: 720px) {
+          .wm-values,
+          .wm-locations,
+          .wm-featured,
+          .wm-story,
+          .wm-testimonials,
+          .wm-faq,
+          .wm-cta {
+            padding: 82px 0;
+          }
+          .wm-section {
+            width: min(1320px, calc(100vw - 24px));
+          }
+          .wm-hero__inner {
+            padding: 122px 0 90px;
+          }
+          .wm-hero__title {
+            font-size: clamp(52px, 14vw, 74px);
+          }
+          .wm-hero__sub {
+            font-size: 15px;
+          }
+          .wm-showcase__hero {
+            min-height: 360px;
+          }
+          .wm-stats__panel,
+          .wm-values__grid,
+          .wm-locations__grid,
+          .wm-featured__grid,
+          .wm-testimonials__grid,
+          .wm-faq__cols {
+            grid-template-columns: 1fr;
+          }
+          .wm-story__media {
+            min-height: 460px;
+          }
+          .wm-story__frame {
+            inset: 0 0 52px;
+          }
+          .wm-story__mini {
+            right: 0;
+            width: min(240px, 62%);
+          }
+          .wm-story__floating-stat {
+            left: 12px;
+            top: 12px;
+          }
+          .wm-cta__panel {
+            padding: 36px 26px;
+            border-radius: 28px;
+          }
+          .wm-cta__actions,
+          .wm-help-card__actions,
+          .wm-hero__actions {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .wm-button,
+          .wm-button--small {
+            width: 100%;
+          }
+        }
+        @media (hover: none) {
+          .wm-button:hover,
+          .wm-link:hover,
+          .wm-value-card:hover,
+          .wm-location-card:hover {
+            transform: none;
+          }
+          .wm-feature-card:hover .wm-feature-card__media img {
+            transform: none;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          html {
+            scroll-behavior: auto;
+          }
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
         }
       `}</style>
-
-      {/* Custom cursor */}
-      <motion.div
-        className={`wm-cursor-outer${cursorHover ? " is-hover" : ""}`}
-        style={{
-          translateX: cursorPos.x - (cursorHover ? 28 : 18),
-          translateY: cursorPos.y - (cursorHover ? 28 : 18),
-        }}
-        animate={{ opacity: cursorVisible ? 1 : 0 }}
-        transition={{ duration: 0.15 }}
-      />
-      <motion.div
-        className="wm-cursor-inner"
-        style={{ translateX: cursorPos.x - 2.5, translateY: cursorPos.y - 2.5 }}
-        animate={{ opacity: cursorVisible ? 1 : 0 }}
-        transition={{ duration: 0 }}
-      />
-
+      <motion.div className="wm-progress" style={{ scaleX: progress }} />
+      {interactiveMotion ? (
+        <>
+          <motion.div
+            className="wm-page__glow"
+            style={{ background: cursorAura }}
+            animate={{ opacity: cursorVisible ? 1 : 0 }}
+            transition={{ duration: 0.18 }}
+          />
+          <motion.div
+            className={`wm-cursor-outer${cursorHover ? " is-hover" : ""}`}
+            style={{ x: cursorX, y: cursorY }}
+            animate={{ opacity: cursorVisible ? 1 : 0 }}
+            transition={{ duration: 0.16 }}
+          />
+          <motion.div
+            className="wm-cursor-inner"
+            style={{ x: cursorX, y: cursorY }}
+            animate={{ opacity: cursorVisible ? 1 : 0 }}
+            transition={{ duration: 0.12 }}
+          />
+        </>
+      ) : null}
       <div className="wm-page">
-
-        {/* ══════════ HERO ══════════ */}
-        <section className="wm-hero" ref={heroRef}>
+        <section ref={heroRef} className="wm-hero">
           <motion.div
             className="wm-hero__bg"
-            style={{ backgroundImage: `url(${heroSlide})`, y: bgY, opacity: bgOpacity, scale: bgScale }}
+            style={{
+              backgroundImage: `url(${heroSlide})`,
+              y: heroY,
+              scale: heroScale,
+              opacity: heroOpacity,
+            }}
           />
           <div className="wm-hero__overlay" />
-          <div className="wm-hero__amber-wash" />
-          <div className="wm-hero__grain" />
-          <div className="wm-hero__orb wm-hero__orb--1" />
-          <div className="wm-hero__orb wm-hero__orb--2" />
-          <div className="wm-hero__scanline" />
-
-          {/* Floating particles */}
-          <div className="wm-particles">
-            {Array.from({ length: 18 }).map((_, i) => {
-              const size  = i % 4 === 0 ? 3 : i % 3 === 0 ? 2 : 1.5;
-              const color = i % 5 === 0 ? "#c8590a" : i % 7 === 0 ? "rgba(232,160,48,0.4)" : "rgba(240,235,228,0.07)";
-              return (
-                <motion.div
-                  key={i}
-                  className="wm-particle"
-                  style={{
-                    width: size, height: size, background: color,
-                    left: `${5 + (i * 4.8) % 90}%`,
-                    top:  `${10 + (i * 7.3) % 80}%`,
-                    boxShadow: i % 5 === 0 ? `0 0 8px ${color}` : "none",
-                  }}
-                  animate={{ y: [0, -44, 0], opacity: [0, 1, 0], scale: [0, 1, 0] }}
-                  transition={{
-                    duration: 3.5 + (i % 5) * 0.65,
-                    delay: i * 0.42,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-              );
-            })}
-          </div>
-
-          <div className="wm-hero__inner">
-            {/* LEFT copy */}
-            <motion.div style={{ y: textY }}>
-              {/* pedigree badge */}
-              <motion.div
-                className="wm-hero__badge"
-                initial={{ opacity: 0, y: -12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: [0.22,1,0.36,1] }}
-              >
-                <div className="wm-hero__badge-dot">
-                  <Sparkles style={{ width: 13, height: 13 }} />
-                </div>
-                <span className="wm-hero__badge-text">
-                  <strong>Maryland's Favorite</strong> — Est. {SITE.established}
+          <div className="wm-hero__noise" />
+          <div className="wm-hero__beam" />
+          <div className="wm-hero__orb" />
+          <div className="wm-section wm-hero__inner">
+            <motion.div
+              className="wm-hero__copy"
+              style={{ y: copyY }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="wm-hero__badge">
+                <span className="wm-hero__badge-icon">
+                  <Sparkles />
                 </span>
-              </motion.div>
-
-              <div className="wm-hero__title wm-display">
-                {["Come Hungry.", "Leave Happy."].map((line, li) => (
-                  <div key={li} className="wm-hero__title-line">
+                <span className="wm-hero__badge-copy">
+                  <strong>Maryland Favorite</strong> since {SITE.established}
+                </span>
+              </div>
+              <h1 className="wm-display wm-hero__title">
+                {["Come Hungry.", "Leave Happy."].map((line, index) => (
+                  <span key={line} className={`wm-hero__line${index === 1 ? " wm-hero__line--accent" : ""}`}>
                     <motion.span
-                      className={`wm-hero__title-inner${li === 1 ? " wm-shimmer" : ""}`}
-                      initial={{ y: "108%", rotateX: 14 }}
+                      initial={{ y: "110%", rotateX: 12 }}
                       animate={{ y: "0%", rotateX: 0 }}
                       transition={{
-                        duration: 1.0,
-                        delay: 0.1 + li * 0.2,
+                        duration: 0.95,
+                        delay: 0.08 + index * 0.16,
                         ease: [0.22, 1, 0.36, 1],
                       }}
-                      style={{ display: "block", transformOrigin: "bottom" }}
                     >
                       {line}
                     </motion.span>
-                  </div>
+                  </span>
                 ))}
-              </div>
-
+              </h1>
               <motion.p
                 className="wm-hero__sub"
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.55 }}
+                transition={{ duration: 0.7, delay: 0.42 }}
               >
-                Fresh ingredients. Bold flavors. Three Maryland locations ready to serve you
-                — because every meal should be worth the trip.
+                Fresh pizza, famous fried chicken, stacked subs, crisp salads, and breakfast favorites served fast
+                with the kind of warmth that turns first-timers into regulars.
               </motion.p>
-
               <motion.div
-                className="wm-hero__ctas"
-                initial={{ opacity: 0, y: 14 }}
+                className="wm-hero__actions"
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7 }}
+                transition={{ duration: 0.64, delay: 0.55 }}
               >
-                <Link to="/order" className="wm-btn-primary">
-                  Order Now <ArrowRight style={{ width: 14, height: 14 }} />
+                <Link to="/order" className="wm-button wm-button--primary">
+                  Order Now <ArrowRight />
                 </Link>
-                <Link to="/locations" className="wm-btn-outline">
-                  View Menus
+                <Link to="/locations" className="wm-button wm-button--ghost">
+                  Find Your Location
                 </Link>
               </motion.div>
-
-              {/* trust signals */}
               <motion.div
-                className="wm-hero__trust"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
+                className="wm-hero__chips"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.64, delay: 0.7 }}
+              >
+                <span className="wm-chip">
+                  <Leaf />
+                  Fresh prep every morning
+                </span>
+                <span className="wm-chip">
+                  <Clock />
+                  Breakfast through dinner
+                </span>
+                <span className="wm-chip">
+                  <Users />
+                  Family favorite since {SITE.established}
+                </span>
+              </motion.div>
+              <motion.div
+                className="wm-hero__signals"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.64, delay: 0.82 }}
               >
                 {[
-                  { icon: Star, text: "4.8 avg rating" },
-                  { icon: MapPin, text: "3 locations" },
-                  { icon: Clock, text: "Open daily" },
-                ].map((item, i) => (
-                  <>
-                    {i > 0 && <div key={`dot-${i}`} className="wm-hero__trust-dot" />}
-                    <div key={item.text} className="wm-hero__trust-item">
+                  {
+                    icon: Star,
+                    label: "4.8 average rating",
+                    copy: "A local go-to for comfort food that actually earns repeat visits.",
+                  },
+                  {
+                    icon: MapPin,
+                    label: "3 Maryland locations",
+                    copy: "Sharptown, East New Market, and Vienna, each with its own loyal crowd.",
+                  },
+                  {
+                    icon: Award,
+                    label: `${yearsServing}+ years serving`,
+                    copy: "The same promise since day one: good food, fast, at a fair price.",
+                  },
+                ].map((item) => (
+                  <div key={item.label} className="wm-hero__signal">
+                    <div className="wm-hero__signal-top">
                       <item.icon />
-                      {item.text}
+                      {item.label}
                     </div>
-                  </>
+                    <div className="wm-hero__signal-copy">{item.copy}</div>
+                  </div>
                 ))}
               </motion.div>
             </motion.div>
-
-            {/* RIGHT — floating card stack */}
-            <div className="wm-hero__right">
-              {[
-                { img: heroPizza,   name: "Hand-Stretched Pizza",  price: "from $12.99", tag: "Signature",    i: 0 },
-                { img: heroChicken, name: "Famous Fried Chicken",  price: "from $6.99",  tag: "Best Seller",  i: 1 },
-                { img: heroSub,     name: "Hot Subs & Steaks",     price: "from $11.99", tag: "Fan Favorite", i: 2 },
-                { img: heroSalad,   name: "Fresh Salads",          price: "from $9.99",  tag: "Daily Fresh",  i: 3 },
-              ].map((item) => (
-                <motion.div
-                  key={item.i}
-                  className={`wm-food-card wm-food-card--${item.i}`}
-                  initial={{ opacity: 0, y: 56, scale: 0.84 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.92, delay: 0.48 + item.i * 0.15, ease: [0.22,1,0.36,1] }}
-                  whileHover={{ y: -12, scale: 1.05, zIndex: 20, transition: { duration: 0.32 } }}
-                >
-                  <div className="wm-food-card__img">
-                    <img src={item.img} alt={item.name} loading={item.i > 1 ? "lazy" : undefined} />
-                    <div className="wm-food-card__img-overlay" />
+            <motion.div
+              className="wm-showcase"
+              initial={{ opacity: 0, y: 28, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.86, delay: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <TiltCard className="wm-showcase__hero" enabled={interactiveMotion} strength={4} interactive>
+                <img src={heroChicken} alt="Wise Mart fried chicken and comfort food spread" />
+                <div className="wm-showcase__hero-copy">
+                  <span className="wm-showcase__label">Crowd Favorite</span>
+                  <h2 className="wm-display wm-showcase__title">Fast comfort food with real personality.</h2>
+                  <p className="wm-showcase__copy">
+                    Pizza, fried chicken, subs, salads, and breakfast done with speed, flavor, and none of the chain-store blandness.
+                  </p>
+                  <div className="wm-showcase__cta">
+                    <Link to="/order" className="wm-link">
+                      Start Your Order <ArrowRight />
+                    </Link>
                   </div>
-                  <div className="wm-food-card__body">
-                    <div className="wm-food-card__tag">{item.tag}</div>
-                    <div className="wm-food-card__name">{item.name}</div>
-                    <div className="wm-food-card__price">{item.price}</div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+                <div className="wm-showcase__stamp">
+                  <small>Serving Since</small>
+                  <strong>{SITE.established}</strong>
+                </div>
+              </TiltCard>
+              <div className="wm-showcase__grid">
+                {FEATURED.slice(0, 3).map((item) => (
+                  <TiltCard
+                    key={item.name}
+                    className="wm-showcase__mini"
+                    enabled={interactiveMotion}
+                    strength={5}
+                    interactive
+                  >
+                    <img src={item.img} alt={item.name} loading="lazy" />
+                    <div className="wm-showcase__mini-copy">
+                      <div className="wm-showcase__mini-tag">{item.tag}</div>
+                      <div className="wm-showcase__mini-name">{item.name}</div>
+                      <div className="wm-showcase__mini-price">{item.price}</div>
+                    </div>
+                  </TiltCard>
+                ))}
+              </div>
+            </motion.div>
           </div>
-
           <div className="wm-scroll-cue">
             <div className="wm-scroll-cue__track" />
-            <span>scroll</span>
+            <span>Scroll</span>
           </div>
         </section>
-
-        {/* ══════════ TICKER ══════════ */}
-        <div className="wm-ticker">
-          <div className="wm-ticker__track">
+        <section className="wm-marquee" aria-label="Highlights">
+          <div className="wm-marquee__track">
             {Array.from({ length: 2 }).map((_, pass) =>
-              ["Hand-Stretched Pizza", "Famous Fried Chicken", "Hot Subs & Steaks", "Fresh Salads", "3 Maryland Locations", "Open Daily", "Catering Available", "Est. 2010"].map((item, i) => (
-                <div key={`${pass}-${i}`} className="wm-ticker__item">
-                  {item}<span />
+              MARQUEE_ITEMS.map((item, index) => (
+                <div key={`${pass}-${index}`} className="wm-marquee__item">
+                  {item}
+                  <span className="wm-marquee__dot" />
                 </div>
-              ))
+              )),
             )}
           </div>
-        </div>
-
-        {/* ══════════ STATS BAR ══════════ */}
-        <div className="wm-stats-bar">
-          <div className="wm-stats-bar__inner">
-            {[
-              { num: 3,   suffix: "",   label: "Locations"     },
-              { num: 15,  suffix: "+",  label: "Years Serving" },
-              { num: 50,  suffix: "+",  label: "Menu Items"    },
-              { num: 4.8, suffix: "★",  label: "Avg. Rating"   },
-            ].map((s, i) => (
-              <motion.div
-                key={s.label} className="wm-stat-item"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22,1,0.36,1] }}
-              >
-                <div className="wm-stat-item__num">
-                  {s.suffix === "★"
-                    ? <><CountUp to={48} />/50</>
-                    : <><CountUp to={typeof s.num === "number" ? s.num : 0} />{s.suffix}</>
-                  }
-                </div>
-                <div className="wm-stat-item__label">{s.label}</div>
-                <span className="wm-stat-item__accent" />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* ══════════ VALUES ══════════ */}
-        <section className="wm-values">
-          <div className="wm-values__bg" />
+        </section>
+        <section className="wm-stats">
           <div className="wm-section">
-            <motion.div
-              className="wm-values__header"
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.65, ease: [0.22,1,0.36,1] }}
-            >
-              <span className="wm-eyebrow"><span className="wm-eyebrow-line" /> Why Wise Mart <span className="wm-eyebrow-line" /></span>
-              <h2 className="wm-display wm-section-title">Our Promise<br /><em>to Every Guest</em></h2>
-              <p className="wm-section-sub" style={{ margin: "16px auto 0" }}>Four commitments that have guided every plate we serve since 2010.</p>
-            </motion.div>
-            <div className="wm-values__grid">
-              {VALUES.map((v, i) => (
+            <div className="wm-stats__panel">
+              {[
+                { value: <CountUp to={3} />, label: "Locations" },
+                { value: <CountUp to={yearsServing} suffix="+" />, label: "Years Serving" },
+                { value: <CountUp to={50} suffix="+" />, label: "Menu Favorites" },
+                { value: <CountUp to={4.8} decimals={1} />, label: "Average Rating" },
+              ].map((stat, index) => (
                 <motion.div
-                  key={v.title}
-                  className="wm-value"
-                  initial={{ opacity: 0, y: 40 }}
+                  key={stat.label}
+                  className="wm-stat"
+                  initial={{ opacity: 0, y: 22 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.65, delay: i * 0.1, ease: [0.22,1,0.36,1] }}
+                  transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <div className="wm-value__index">{String(i + 1).padStart(2, "0")}</div>
-                  <div className="wm-value__icon-wrap"><v.icon /></div>
-                  <div className="wm-value__title">{v.title}</div>
-                  <div className="wm-value__desc">{v.desc}</div>
+                  <div className="wm-stat__value">{stat.value}</div>
+                  <div className="wm-stat__label">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
-
-        {/* ══════════ LOCATIONS ══════════ */}
+        <section className="wm-values">
+          <div className="wm-section">
+            <SectionIntro
+              eyebrow="Why Wise Mart"
+              title={
+                <>
+                  Comfort food that feels <br />
+                  <em>deliberate, not generic.</em>
+                </>
+              }
+              body="Fresh prep, fast service, generous portions, and small-town hospitality have shaped every order since 2010."
+              align="center"
+            />
+            <div className="wm-values__grid">
+              {VALUES.map((value, index) => (
+                <motion.div
+                  key={value.title}
+                  className="wm-value-card"
+                  initial={{ opacity: 0, y: 26 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.56, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <span className="wm-value-card__number">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="wm-value-card__icon">
+                    <value.icon />
+                  </span>
+                  <h3 className="wm-display wm-value-card__title">{value.title}</h3>
+                  <p className="wm-value-card__copy">{value.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
         <section className="wm-locations">
           <div className="wm-section">
-            <motion.div
-              style={{ textAlign: "center" }}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.65, ease: [0.22,1,0.36,1] }}
-            >
-              <span className="wm-eyebrow"><span className="wm-eyebrow-line" /> Three Locations <span className="wm-eyebrow-line" /></span>
-              <h2 className="wm-display wm-section-title">Pick Your<br /><em>Wise Mart</em></h2>
-              <p className="wm-section-sub" style={{ margin: "16px auto 0" }}>Each kitchen carries its own personality — same Wise Mart promise throughout.</p>
-            </motion.div>
+            <SectionIntro
+              eyebrow="Three Locations"
+              title={
+                <>
+                  Pick the Wise Mart <br />
+                  <em>closest to your appetite.</em>
+                </>
+              }
+              body="Each location keeps the same food-first attitude, but every town brings its own personality to the counter."
+              align="center"
+            />
             <div className="wm-locations__grid">
-              {LOCATIONS.map((loc, i) => (
-                <motion.div
-                  key={loc.slug}
-                  initial={{ opacity: 0, y: 52 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.68, delay: i * 0.13, ease: [0.22,1,0.36,1] }}
-                >
-                  <Link to="/locations" className="wm-loc-card">
-                    <div className="wm-loc-card__glow" />
-                    <div className="wm-loc-card__corner" />
-                    <div className="wm-loc-card__num">0{i + 1} — Maryland</div>
-                    <div className="wm-loc-card__name">{loc.name}</div>
-                    <div className="wm-loc-card__tagline">{loc.tagline}</div>
-                    <div className="wm-loc-card__sep" />
-                    <div className="wm-loc-card__specialty">{loc.specialty}</div>
-                    <div className="wm-loc-card__footer">
-                      <span className="wm-loc-card__cta">
-                        View Menu <ArrowRight style={{ width: 12, height: 12 }} />
-                      </span>
-                      <a
-                        href={loc.phoneHref}
-                        onClick={(e) => e.stopPropagation()}
-                        className="wm-loc-card__phone"
-                      >
-                        <Phone style={{ width: 10, height: 10 }} />{loc.phone}
-                      </a>
-                    </div>
-                  </Link>
-                </motion.div>
+              {LOCATIONS.map((location, index) => (
+                <LocationCard key={location.slug} location={location} index={index} />
               ))}
             </div>
           </div>
         </section>
-
-        {/* ══════════ FEATURED ══════════ */}
         <section className="wm-featured">
           <div className="wm-section">
-            <motion.div
-              className="wm-featured__header"
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.65, ease: [0.22,1,0.36,1] }}
-            >
-              <div>
-                <span className="wm-eyebrow"><span className="wm-eyebrow-line" /> Featured</span>
-                <h2 className="wm-display wm-section-title">What We're<br /><em>Known For</em></h2>
-              </div>
-              <Link to="/locations" className="wm-text-link" style={{ marginBottom: 8, flexShrink: 0 }}>
-                Full Menus <ArrowRight />
+            <div className="wm-featured__top">
+              <SectionIntro
+                eyebrow="Featured Menu"
+                title={
+                  <>
+                    The food people <br />
+                    <em>talk about first.</em>
+                  </>
+                }
+                body="From pizza nights and chicken runs to loaded subs and fresh salads, these are the menu staples guests come back for most."
+              />
+              <Link to="/locations" className="wm-link">
+                Browse Full Menus <ArrowRight />
               </Link>
-            </motion.div>
+            </div>
             <div className="wm-featured__grid">
-              {FEATURED.map((f, i) => (
-                <motion.div
-                  key={f.name}
-                  initial={{ opacity: 0, y: 44, scale: 0.92 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.65, delay: i * 0.1, ease: [0.22,1,0.36,1] }}
-                >
-                  <TiltCard className="wm-feat-card" strength={6}>
-                    <div className="wm-feat-card__img">
-                      <img src={f.img} alt={f.name} loading="lazy" />
-                      <div className="wm-feat-card__badge"><f.icon /></div>
-                      <div className="wm-feat-card__img-scrim" />
-                    </div>
-                    <div className="wm-feat-card__body">
-                      <div className="wm-feat-card__tag">{f.tag}</div>
-                      <div className="wm-feat-card__name">{f.name}</div>
-                      <div className="wm-feat-card__price">{f.price}</div>
-                      <div className="wm-feat-card__action">
-                        Order Now <ChevronRight style={{ width: 11, height: 11 }} />
-                      </div>
-                    </div>
-                  </TiltCard>
-                </motion.div>
+              {FEATURED.map((item, index) => (
+                <FeaturedCard key={item.name} item={item} index={index} tiltEnabled={interactiveMotion} />
               ))}
             </div>
           </div>
         </section>
-
-        {/* ══════════ STORY ══════════ */}
         <section className="wm-story">
-          <div className="wm-story__grid-deco" />
           <div className="wm-section">
-            <div className="wm-story__inner">
+            <div className="wm-story__layout">
               <motion.div
-                initial={{ opacity: 0, x: -44 }}
+                initial={{ opacity: 0, x: -28 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.78, ease: [0.22,1,0.36,1] }}
+                transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
               >
-                <span className="wm-eyebrow"><span className="wm-eyebrow-line" /> Our Story</span>
-                <h2 className="wm-display wm-section-title">More than a meal —<br /><em>a Maryland tradition.</em></h2>
+                <SectionIntro
+                  eyebrow="Our Story"
+                  title={
+                    <>
+                      More than a quick stop. <br />
+                      <em>A Maryland routine.</em>
+                    </>
+                  }
+                  body="Wise Mart started with a simple belief: if the food is honest and the service is warm, people remember it."
+                />
                 <p className="wm-story__lead">
-                  "Serve good food, fast, at a fair price — and treat every guest like family."
+                  "Serve good food, fast, at a fair price, and treat every guest like family."
                 </p>
-                <p className="wm-story__text">
-                  Wise Mart opened its doors in {SITE.established} with that single conviction. Three locations and fifteen years later, nothing has changed — except the faces of the neighbors we've come to know.
+                <p className="wm-story__body">
+                  That idea has guided Wise Mart since {SITE.established}. From Sharptown pizza nights to Vienna breakfast runs and East New Market sub cravings, the experience stays grounded in consistency, hospitality, and food worth repeating.
                 </p>
-                <p className="wm-story__text">
-                  From the pizza ovens in Sharptown to the breakfast counters in Vienna, every plate carries the same care, the same ingredients, the same pride.
-                </p>
-                <Link to="/about" className="wm-text-link" style={{ marginTop: 36, display: "inline-flex" }}>
-                  Read our full story <ArrowRight />
-                </Link>
+                <div className="wm-story__points">
+                  {STORY_POINTS.map((point) => (
+                    <div key={point} className="wm-story__point">
+                      <Sparkles />
+                      <span>{point}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="wm-story__actions">
+                  <Link to="/about" className="wm-link">
+                    Read Our Full Story <ArrowRight />
+                  </Link>
+                </div>
               </motion.div>
-
               <motion.div
-                initial={{ opacity: 0, x: 44, scale: 0.95 }}
+                className="wm-story__media"
+                initial={{ opacity: 0, x: 28, scale: 0.98 }}
                 whileInView={{ opacity: 1, x: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.78, delay: 0.1, ease: [0.22,1,0.36,1] }}
+                transition={{ duration: 0.68, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
               >
                 <div className="wm-story__frame">
-                  <div className="wm-story__frame-deco" />
-                  <div className="wm-story__img-wrap">
-                    <img src={heroPizza} alt="Hand-stretched pizza" loading="lazy" />
-                    <div className="wm-story__img-caption">Made by hand. Served with pride.</div>
+                  <img src={heroPizza} alt="Wise Mart pizza prepared by hand" loading="lazy" />
+                  <div className="wm-story__caption">Made by hand. Served with pride.</div>
+                </div>
+                <div className="wm-story__floating-stat">
+                  <div className="wm-story__floating-value">
+                    <CountUp to={yearsServing} suffix="+" />
                   </div>
-                  <div className="wm-story__year-badge">
-                    <small>Est.</small>
-                    {SITE.established}
+                  <div className="wm-story__floating-label">years of neighborhood favorites</div>
+                </div>
+                <div className="wm-story__mini">
+                  <img src={heroSalad} alt="Fresh daily-prepped salad at Wise Mart" loading="lazy" />
+                  <div className="wm-story__mini-copy">
+                    <div className="wm-story__mini-eyebrow">Daily Fresh</div>
+                    <div className="wm-story__mini-title">Prep that keeps the fast food feeling genuinely fresh.</div>
                   </div>
                 </div>
               </motion.div>
             </div>
           </div>
         </section>
-
-        {/* ══════════ TESTIMONIALS ══════════ */}
         <section className="wm-testimonials">
           <div className="wm-section">
-            <motion.div
-              style={{ textAlign: "center" }}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.65, ease: [0.22,1,0.36,1] }}
-            >
-              <span className="wm-eyebrow"><span className="wm-eyebrow-line" /> Reviews <span className="wm-eyebrow-line" /></span>
-              <h2 className="wm-display wm-section-title">What Our<br /><em>Guests Say</em></h2>
-            </motion.div>
+            <SectionIntro
+              eyebrow="Guest Reviews"
+              title={
+                <>
+                  The regulars tell the story <br />
+                  <em>better than we can.</em>
+                </>
+              }
+              body="From breakfast regulars to late-night pizza runs, the best proof is the people who keep coming back."
+              align="center"
+            />
             <div className="wm-testimonials__grid">
-              {[
-                { q: "Best fried chicken on the Eastern Shore. Hands down.",       author: "Marcus T.",     loc: "Sharptown"       },
-                { q: "The breakfast pizza is a game changer. We're regulars now.", author: "Sarah & Jim",   loc: "Vienna"          },
-                { q: "Cheesesteak subs that actually taste like Philly.",          author: "Dee R.",        loc: "East New Market" },
-              ].map((t, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 40, scale: 0.94 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.62, delay: i * 0.12, ease: [0.22,1,0.36,1] }}
-                >
-                  <TiltCard className="wm-review" strength={5}>
-                    <div className="wm-review__bg-quote">"</div>
-                    <div className="wm-review__stars">
-                      {Array.from({ length: 5 }).map((_, j) => <Star key={j} />)}
-                    </div>
-                    <div className="wm-review__quote">"{t.q}"</div>
-                    <div className="wm-review__sep" />
-                    <div className="wm-review__author">{t.author}</div>
-                    <div className="wm-review__location"><MapPin style={{ width: 9, height: 9, display: "inline", marginRight: 4 }} />{t.loc}</div>
-                  </TiltCard>
-                </motion.div>
+              {TESTIMONIALS.map((testimonial, index) => (
+                <ReviewCard
+                  key={testimonial.author}
+                  quote={testimonial.quote}
+                  author={testimonial.author}
+                  location={testimonial.location}
+                  index={index}
+                  tiltEnabled={interactiveMotion}
+                />
               ))}
             </div>
           </div>
         </section>
-
-        {/* ══════════ FAQ ══════════ */}
         <section className="wm-faq">
           <div className="wm-section">
-            <motion.div
-              style={{ textAlign: "center" }}
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.65, ease: [0.22,1,0.36,1] }}
-            >
-              <span className="wm-eyebrow"><span className="wm-eyebrow-line" /> FAQ <span className="wm-eyebrow-line" /></span>
-              <h2 className="wm-display wm-section-title">Quick<br /><em>Answers</em></h2>
-              <p className="wm-section-sub" style={{ margin: "16px auto 0" }}>Everything our guests ask most — answered simply.</p>
-            </motion.div>
+            <SectionIntro
+              eyebrow="Quick Answers"
+              title={
+                <>
+                  Questions guests ask <br />
+                  <em>all the time.</em>
+                </>
+              }
+              body="Ordering, hours, catering, dietary questions, and the details most guests want before they visit."
+              align="center"
+            />
             <div className="wm-faq__cols">
               <div>
-                {FAQS.slice(0, 5).map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} index={i} />
+                {FAQS.slice(0, 5).map((item, index) => (
+                  <FAQItem key={item.q} q={item.q} a={item.a} index={index} />
                 ))}
               </div>
               <div>
-                {FAQS.slice(5).map((item, i) => (
-                  <FAQItem key={i + 5} q={item.q} a={item.a} index={i + 5} />
+                <motion.div
+                  className="wm-help-card"
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <div className="wm-help-card__eyebrow">Need Something Else?</div>
+                  <h3 className="wm-display wm-help-card__title">Menu details, pickup times, and location info are one tap away.</h3>
+                  <p className="wm-help-card__copy">
+                    See menus, call the shop, or head straight into your order. However you like to decide, the next step is close.
+                  </p>
+                  <div className="wm-help-card__actions">
+                    <Link to="/locations" className="wm-button wm-button--ghost wm-button--small">
+                      See Locations
+                    </Link>
+                    <Link to="/order" className="wm-button wm-button--primary wm-button--small">
+                      Start Order
+                    </Link>
+                  </div>
+                </motion.div>
+                {FAQS.slice(5).map((item, index) => (
+                  <FAQItem key={item.q} q={item.q} a={item.a} index={index + 5} />
                 ))}
               </div>
             </div>
+          </div>
+        </section>
+        <section className="wm-cta">
+          <div className="wm-section">
             <motion.div
-              style={{ textAlign: "center", marginTop: 56 }}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              className="wm-cta__panel"
+              style={{
+                backgroundImage: `url(${heroSlide})`,
+              }}
+              initial={{ opacity: 0, y: 28, scale: 0.98 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Link to="/faq" className="wm-text-link" style={{ display: "inline-flex" }}>
-                See all FAQs <ArrowRight />
-              </Link>
+              <div>
+                <div className="wm-cta__eyebrow">Ready When You Are</div>
+                <h2 className="wm-display wm-cta__title">Pick a location, place the order, and show up hungry.</h2>
+                <p className="wm-cta__copy">
+                  Choose your nearest Wise Mart, build the order, and we will have the comfort food part covered.
+                </p>
+              </div>
+              <div className="wm-cta__actions">
+                <Link to="/order" className="wm-button wm-button--primary">
+                  Order Now <ArrowRight />
+                </Link>
+                <Link to="/locations" className="wm-button wm-button--dark">
+                  Find a Location
+                </Link>
+              </div>
             </motion.div>
           </div>
         </section>
-
-        {/* ══════════ CTA BANNER ══════════ */}
-        <div className="wm-cta-section">
-          <div className="wm-section">
-            <motion.div
-              className="wm-cta-box"
-              initial={{ opacity: 0, y: 52, scale: 0.97 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.78, ease: [0.22,1,0.36,1] }}
-              whileHover={{ scale: 1.007, transition: { duration: 0.38 } }}
-            >
-              <div className="wm-cta-box__pattern" />
-              <div className="wm-cta-box__circle" />
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <h3 className="wm-cta-box__title">Ready to order?</h3>
-                <p className="wm-cta-box__sub">
-                  Pick your location, place your order, and we'll have it ready when you arrive.
-                </p>
-              </div>
-              <div className="wm-cta-box__btns">
-                <Link to="/order"     className="wm-btn-dark">
-                  Order Now <ArrowRight style={{ width: 13, height: 13 }} />
-                </Link>
-                <Link to="/locations" className="wm-btn-ghost">Find a Location</Link>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
       </div>
     </>
   );
