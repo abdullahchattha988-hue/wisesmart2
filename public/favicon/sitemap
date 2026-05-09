@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Main Pages -->
+  <url>
+    <loc>https://www.wisemart2.com/</loc>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/about</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu</loc>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/contact</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Location Based Menus -->
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Sharptown Menu Categories -->
+  <url>
+    <loc>https://www.wisemart2.com/menu#pizza</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu#chicken</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu#combo-meals</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu#hot-subs</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu#salads</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu#side-orders</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu#breakfast</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- East New Market Menu -->
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new#pizza</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new#chicken</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new#combo-meals</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new#hot-subs</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new#salads</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/east-new#side-orders</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Vienna Menu -->
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna#pizza</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna#chicken</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna#combo-meals</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna#hot-subs</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna#salads</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://www.wisemart2.com/menu/vienna#side-orders</loc>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
